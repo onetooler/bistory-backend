@@ -10,6 +10,8 @@ import (
 	"github.com/onetooler/bistory-backend/model"
 )
 
+// TODO: change gorilla/sessions to SCS for better performance
+
 const (
 	// sessionStr represents a string of session key.
 	sessionStr = "GSESSION"

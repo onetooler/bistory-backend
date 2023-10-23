@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/ybkuroki/go-webapp-sample/config"
-	"github.com/ybkuroki/go-webapp-sample/repository"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 

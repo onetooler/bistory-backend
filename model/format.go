@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/moznion/go-optional"
-	"github.com/ybkuroki/go-webapp-sample/repository"
+	"github.com/onetooler/bistory-backend/repository"
 )
 
 // Format defines struct of format data.

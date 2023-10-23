@@ -638,8 +638,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "localhost:8080",
 	BasePath:    "/api",
 	Schemes:     []string{},
-	Title:       "go-webapp-sample API",
-	Description: "This is API specification for go-webapp-sample project.",
+	Title:       "bistory-backend API",
+	Description: "This is API specification for bistory-backend project.",
 }
 
 type s struct{}

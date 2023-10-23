@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/util"
 	"github.com/stretchr/testify/assert"
-	"github.com/ybkuroki/go-webapp-sample/config"
-	"github.com/ybkuroki/go-webapp-sample/test"
-	"github.com/ybkuroki/go-webapp-sample/util"
 	"go.uber.org/zap/zaptest/observer"
 )
 

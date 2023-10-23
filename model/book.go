@@ -6,8 +6,8 @@ import (
 	"math"
 
 	"github.com/moznion/go-optional"
-	"github.com/ybkuroki/go-webapp-sample/repository"
-	"github.com/ybkuroki/go-webapp-sample/util"
+	"github.com/onetooler/bistory-backend/repository"
+	"github.com/onetooler/bistory-backend/util"
 	"gorm.io/gorm"
 )
 

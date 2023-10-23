@@ -1,10 +1,10 @@
 package container
 
 import (
-	"github.com/ybkuroki/go-webapp-sample/config"
-	"github.com/ybkuroki/go-webapp-sample/logger"
-	"github.com/ybkuroki/go-webapp-sample/repository"
-	"github.com/ybkuroki/go-webapp-sample/session"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/logger"
+	"github.com/onetooler/bistory-backend/repository"
+	"github.com/onetooler/bistory-backend/session"
 )
 
 // Container represents a interface for accessing the data which sharing in overall application.

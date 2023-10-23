@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/ybkuroki/go-webapp-sample/repository"
+	"github.com/onetooler/bistory-backend/repository"
 )
 
 // Authority defines struct of authority data.

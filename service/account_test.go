@@ -3,9 +3,9 @@ package service
 import (
 	"testing"
 
+	"github.com/onetooler/bistory-backend/model"
+	"github.com/onetooler/bistory-backend/test"
 	"github.com/stretchr/testify/assert"
-	"github.com/ybkuroki/go-webapp-sample/model"
-	"github.com/ybkuroki/go-webapp-sample/test"
 )
 
 func TestAuthenticateByUsernameAndPassword_Success(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/model/dto"
-	"github.com/ybkuroki/go-webapp-sample/service"
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model/dto"
+	"github.com/onetooler/bistory-backend/service"
 )
 
 // BookController is a controller for managing books.

@@ -12,8 +12,8 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	echomd "github.com/labstack/echo/v4/middleware"
+	"github.com/onetooler/bistory-backend/container"
 	"github.com/valyala/fasttemplate"
-	"github.com/ybkuroki/go-webapp-sample/container"
 	"gopkg.in/boj/redistore.v1"
 )
 

@@ -3,11 +3,11 @@ package service
 import (
 	"testing"
 
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
+	"github.com/onetooler/bistory-backend/model/dto"
+	"github.com/onetooler/bistory-backend/test"
 	"github.com/stretchr/testify/assert"
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/model"
-	"github.com/ybkuroki/go-webapp-sample/model/dto"
-	"github.com/ybkuroki/go-webapp-sample/test"
 )
 
 func TestFindByID_Success(t *testing.T) {

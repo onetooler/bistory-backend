@@ -5,12 +5,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ybkuroki/go-webapp-sample/config"
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/controller"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/controller"
 
+	_ "github.com/onetooler/bistory-backend/docs" // for using echo-swagger
 	echoSwagger "github.com/swaggo/echo-swagger"
-	_ "github.com/ybkuroki/go-webapp-sample/docs" // for using echo-swagger
 )
 
 // Init initialize the routing of this application.

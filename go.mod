@@ -1,4 +1,4 @@
-module github.com/ybkuroki/go-webapp-sample
+module github.com/onetooler/bistory-backend
 
 go 1.20
 

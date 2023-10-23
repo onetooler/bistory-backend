@@ -3,11 +3,11 @@ package service
 import (
 	"errors"
 
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/model"
-	"github.com/ybkuroki/go-webapp-sample/model/dto"
-	"github.com/ybkuroki/go-webapp-sample/repository"
-	"github.com/ybkuroki/go-webapp-sample/util"
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
+	"github.com/onetooler/bistory-backend/model/dto"
+	"github.com/onetooler/bistory-backend/repository"
+	"github.com/onetooler/bistory-backend/util"
 )
 
 // BookService is a service for managing books.

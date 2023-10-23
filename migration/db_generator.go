@@ -1,8 +1,8 @@
 package migration
 
 import (
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/model"
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
 )
 
 // CreateDatabase creates the tables used in this application.

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/ybkuroki/go-webapp-sample/container"
+	"github.com/onetooler/bistory-backend/container"
 )
 
 // HealthController is a controller returns the current status of this application.

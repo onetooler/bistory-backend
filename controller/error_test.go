@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/onetooler/bistory-backend/test"
 	"github.com/stretchr/testify/assert"
-	"github.com/ybkuroki/go-webapp-sample/test"
 )
 
 func TestJSONError(t *testing.T) {

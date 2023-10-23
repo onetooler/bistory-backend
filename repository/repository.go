@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/glebarez/sqlite"
-	"github.com/ybkuroki/go-webapp-sample/config"
-	"github.com/ybkuroki/go-webapp-sample/logger"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

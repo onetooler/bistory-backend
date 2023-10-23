@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ybkuroki/go-webapp-sample/util"
+	"github.com/onetooler/bistory-backend/util"
 	"gopkg.in/yaml.v3"
 )
 

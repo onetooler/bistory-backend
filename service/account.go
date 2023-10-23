@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/ybkuroki/go-webapp-sample/container"
-	"github.com/ybkuroki/go-webapp-sample/model"
+	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
 	"golang.org/x/crypto/bcrypt"
 )
 

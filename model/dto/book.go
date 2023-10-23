@@ -3,7 +3,7 @@ package dto
 import (
 	"encoding/json"
 
-	"github.com/ybkuroki/go-webapp-sample/model"
+	"github.com/onetooler/bistory-backend/model"
 	"gopkg.in/go-playground/validator.v9"
 )
 

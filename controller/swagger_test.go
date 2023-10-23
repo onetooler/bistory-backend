@@ -5,10 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	_ "github.com/onetooler/bistory-backend/docs" // for using echo-swagger
+	"github.com/onetooler/bistory-backend/test"
 	"github.com/stretchr/testify/assert"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	_ "github.com/ybkuroki/go-webapp-sample/docs" // for using echo-swagger
-	"github.com/ybkuroki/go-webapp-sample/test"
 )
 
 func TestSwagger(t *testing.T) {

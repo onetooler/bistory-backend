@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 	echoSession "github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/ybkuroki/go-webapp-sample/model"
+	"github.com/onetooler/bistory-backend/model"
 )
 
 const (

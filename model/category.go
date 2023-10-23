@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/moznion/go-optional"
-	"github.com/ybkuroki/go-webapp-sample/repository"
+	"github.com/onetooler/bistory-backend/repository"
 )
 
 // Category defines struct of category data.

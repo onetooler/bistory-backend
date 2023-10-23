@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ybkuroki/go-webapp-sample/config"
+	"github.com/onetooler/bistory-backend/config"
 	"go.uber.org/zap"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"gopkg.in/yaml.v3"

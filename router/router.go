@@ -18,9 +18,6 @@ func Init(e *echo.Echo, container container.Container) {
 	setCORSConfig(e, container)
 
 	setErrorController(e, container)
-	setBookController(e, container)
-	setCategoryController(e, container)
-	setFormatController(e, container)
 	setAccountController(e, container)
 	setHealthController(e, container)
 
@@ -54,25 +51,6 @@ func setErrorController(e *echo.Echo, container container.Container) {
 	errorHandler := controller.NewErrorController(container)
 	e.HTTPErrorHandler = errorHandler.JSONError
 	e.Use(middleware.Recover())
-}
-
-func setBookController(e *echo.Echo, container container.Container) {
-	book := controller.NewBookController(container)
-	e.GET(config.APIBooksID, func(c echo.Context) error { return book.GetBook(c) })
-	e.GET(config.APIBooks, func(c echo.Context) error { return book.GetBookList(c) })
-	e.POST(config.APIBooks, func(c echo.Context) error { return book.CreateBook(c) })
-	e.PUT(config.APIBooksID, func(c echo.Context) error { return book.UpdateBook(c) })
-	e.DELETE(config.APIBooksID, func(c echo.Context) error { return book.DeleteBook(c) })
-}
-
-func setCategoryController(e *echo.Echo, container container.Container) {
-	category := controller.NewCategoryController(container)
-	e.GET(config.APICategories, func(c echo.Context) error { return category.GetCategoryList(c) })
-}
-
-func setFormatController(e *echo.Echo, container container.Container) {
-	format := controller.NewFormatController(container)
-	e.GET(config.APIFormats, func(c echo.Context) error { return format.GetFormatList(c) })
 }
 
 func setAccountController(e *echo.Echo, container container.Container) {

@@ -40,13 +40,11 @@ type repository struct {
 	db *gorm.DB
 }
 
-// bookRepository is a concrete repository that implements repository.
-type bookRepository struct {
+type repositoryImpl struct {
 	*repository
 }
 
-// NewBookRepository is constructor for bookRepository.
-func NewBookRepository(logger logger.Logger, conf *config.Config) Repository {
+func NewRepository(logger logger.Logger, conf *config.Config) Repository {
 	logger.GetZapLogger().Infof("Try database connection")
 	db, err := connectDatabase(logger, conf)
 	if err != nil {
@@ -54,7 +52,7 @@ func NewBookRepository(logger logger.Logger, conf *config.Config) Repository {
 		os.Exit(config.ErrExitStatus)
 	}
 	logger.GetZapLogger().Infof("Success database connection, %s:%s", conf.Database.Host, conf.Database.Port)
-	return &bookRepository{&repository{db: db}}
+	return &repositoryImpl{&repository{db: db}}
 }
 
 const (

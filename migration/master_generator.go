@@ -16,17 +16,5 @@ func InitMasterData(container container.Container) {
 		_, _ = a.Create(rep)
 		a = model.NewAccountWithPlainPassword("test2", "test2", r.ID)
 		_, _ = a.Create(rep)
-
-		c := model.NewCategory("Technical Book")
-		_, _ = c.Create(rep)
-		c = model.NewCategory("Magazine")
-		_, _ = c.Create(rep)
-		c = model.NewCategory("Novel")
-		_, _ = c.Create(rep)
-
-		f := model.NewFormat("Paper Book")
-		_, _ = f.Create(rep)
-		f = model.NewFormat("e-Book")
-		_, _ = f.Create(rep)
 	}
 }

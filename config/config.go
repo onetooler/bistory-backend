@@ -14,7 +14,7 @@ import (
 type Config struct {
 	Database struct {
 		Dialect   string `default:"sqlite3"`
-		Host      string `default:"book.db"`
+		Host      string `default:"develop.db"`
 		Port      string
 		Dbname    string
 		Username  string

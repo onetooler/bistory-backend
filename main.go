@@ -46,7 +46,7 @@ func main() {
 	messages := config.LoadMessagesConfig(propsFile)
 	logger.GetZapLogger().Infof("Loaded messages.properties")
 
-	rep := repository.NewBookRepository(logger, conf)
+	rep := repository.NewRepository(logger, conf)
 	sess := session.NewSession()
 	container := container.NewContainer(rep, sess, conf, messages, logger, env)
 

@@ -17,6 +17,8 @@ import (
 	"gopkg.in/boj/redistore.v1"
 )
 
+var authorizationPathRegexps map [string]*regexp.Regexp
+
 // InitLoggerMiddleware initialize a middleware for logger.
 func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
 	e.Use(RequestLoggerMiddleware(container))
@@ -30,25 +32,31 @@ func InitSessionMiddleware(e *echo.Echo, container container.Container) {
 
 	e.Use(SessionMiddleware(container))
 
-	if conf.Extension.SecurityEnabled {
-		if conf.Redis.Enabled {
-			logger.GetZapLogger().Infof("Try redis connection")
-			address := fmt.Sprintf("%s:%s", conf.Redis.Host, conf.Redis.Port)
-			store, err := redistore.NewRediStore(conf.Redis.ConnectionPoolSize, "tcp", address, "", []byte("secret"))
-			if err != nil {
-				logger.GetZapLogger().Errorf("Failure redis connection")
-			}
-			e.Use(session.Middleware(store))
-			logger.GetZapLogger().Infof(fmt.Sprintf("Success redis connection, %s", address))
-		} else {
-			e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
-		}
-		e.Use(AuthenticationMiddleware(container))
+	if !conf.Extension.SecurityEnabled{
+		return
 	}
+	e.Use(AuthenticationMiddleware(container))
+
+	var sessionStore echo.MiddlewareFunc
+	if conf.Redis.Enabled {
+		logger.GetZapLogger().Infof("Try redis connection")
+		address := fmt.Sprintf("%s:%s", conf.Redis.Host, conf.Redis.Port)
+		store, err := redistore.NewRediStore(conf.Redis.ConnectionPoolSize, "tcp", address, "", []byte("secret"))
+		if err != nil {
+			logger.GetZapLogger().Panicf("Failure redis connection, %s", err.Error())
+		}
+		sessionStore = session.Middleware(store)
+		logger.GetZapLogger().Infof(fmt.Sprintf("Success redis connection, %s", address))
+	} else {
+		sessionStore = session.Middleware(sessions.NewCookieStore([]byte("secret")))
+	}
+	e.Use(sessionStore)
 }
 
 // RequestLoggerMiddleware is middleware for logging the contents of requests.
 func RequestLoggerMiddleware(container container.Container) echo.MiddlewareFunc {
+	template := fasttemplate.New(container.GetConfig().Log.RequestLogFormat, "${", "}")
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
@@ -57,7 +65,6 @@ func RequestLoggerMiddleware(container container.Container) echo.MiddlewareFunc 
 				c.Error(err)
 			}
 
-			template := fasttemplate.New(container.GetConfig().Log.RequestLogFormat, "${", "}")
 			logstr := template.ExecuteFuncString(func(w io.Writer, tag string) (int, error) {
 				switch tag {
 				case "remote_ip":
@@ -135,6 +142,20 @@ func StaticContentsMiddleware(e *echo.Echo, container container.Container, stati
 
 // AuthenticationMiddleware is the middleware of session authentication for echo.
 func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc {
+	// pre-compile all paths
+	for _, path := range container.GetConfig().Security.AuthPath {
+		authorizationPathRegexps[path] = regexp.MustCompile(path)
+	}
+	for _, path := range container.GetConfig().Security.ExcludePath {
+		authorizationPathRegexps[path] = regexp.MustCompile(path)
+	}
+	for _, path := range container.GetConfig().Security.AdminPath {
+		authorizationPathRegexps[path] = regexp.MustCompile(path)
+	}
+	for _, path := range container.GetConfig().Security.UserPath {
+		authorizationPathRegexps[path] = regexp.MustCompile(path)
+	}
+	
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if !hasAuthorization(c, container) {
@@ -151,31 +172,35 @@ func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc
 // hasAuthorization judges whether the user has the right to access the path.
 func hasAuthorization(c echo.Context, container container.Container) bool {
 	currentPath := c.Path()
-	if equalPath(currentPath, container.GetConfig().Security.AuthPath) {
-		if equalPath(currentPath, container.GetConfig().Security.ExculdePath) {
-			return true
-		}
-		account := container.GetSession().GetAccount()
-		if account == nil {
-			return false
-		}
-		if account.Authority.Name == "Admin" && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
-			_ = container.GetSession().Save()
-			return true
-		}
-		if account.Authority.Name == "User" && equalPath(currentPath, container.GetConfig().Security.UserPath) {
-			_ = container.GetSession().Save()
-			return true
-		}
+
+	if !equalPath(currentPath, container.GetConfig().Security.AuthPath) {
+		return true
+	}
+
+	if equalPath(currentPath, container.GetConfig().Security.ExcludePath) {
+		return true
+	}
+
+	account := container.GetSession().GetAccount()
+	if account == nil {
 		return false
 	}
-	return true
+	if account.Authority.Name == "Admin" && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
+		_ = container.GetSession().Save()
+		return true
+	}
+	if account.Authority.Name == "User" && equalPath(currentPath, container.GetConfig().Security.UserPath) {
+		_ = container.GetSession().Save()
+		return true
+	}
+
+	return false
 }
 
 // equalPath judges whether a given path contains in the path list.
 func equalPath(cpath string, paths []string) bool {
-	for i := range paths {
-		if regexp.MustCompile(paths[i]).Match([]byte(cpath)) {
+	for _, path := range paths {
+		if authorizationPathRegexps[path].Match([]byte(cpath)) {
 			return true
 		}
 	}

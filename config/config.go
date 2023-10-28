@@ -44,7 +44,7 @@ type Config struct {
 	}
 	Security struct {
 		AuthPath    []string `yaml:"auth_path"`
-		ExculdePath []string `yaml:"exclude_path"`
+		ExcludePath []string `yaml:"exclude_path"`
 		UserPath    []string `yaml:"user_path"`
 		AdminPath   []string `yaml:"admin_path"`
 	}

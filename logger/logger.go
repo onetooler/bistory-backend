@@ -58,7 +58,6 @@ func InitLogger(env string, yamlFile embed.FS) Logger {
 		os.Exit(config.ErrExitStatus)
 	}
 	sugar := zap.Sugar()
-	// set package varriable logger.
 	log := NewLogger(sugar)
 	log.GetZapLogger().Infof("Success to read zap logger configuration: zaplogger." + env + ".yml")
 	_ = zap.Sync()

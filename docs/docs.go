@@ -74,7 +74,7 @@ const docTemplate = `{
                 "summary": "Get the account data of logged-in user.",
                 "responses": {
                     "200": {
-                        "description": "Success to fetch the account data. If the security function is disable, it returns the dummy data.",
+                        "description": "Success to fetch the account data. If the security function is disable, it returns disabled message.",
                         "schema": {
                             "$ref": "#/definitions/model.Account"
                         }

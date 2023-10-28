@@ -21,7 +21,7 @@ const (
 	slowThreshold = 200
 )
 
-// LogMode The log level of gorm logger is overwrited by the log level of Zap logger.
+// LogMode The log level of gorm logger is overwritten by the log level of Zap logger.
 func (log *logger) LogMode(_ gormLogger.LogLevel) gormLogger.Interface {
 	return log
 }

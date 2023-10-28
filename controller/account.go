@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/container"
-	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/service"
 )
@@ -19,17 +18,15 @@ type AccountController interface {
 }
 
 type accountController struct {
-	context      container.Container
-	service      service.AccountService
-	dummyAccount *model.Account
+	context container.Container
+	service service.AccountService
 }
 
 // NewAccountController is constructor.
 func NewAccountController(container container.Container) AccountController {
 	return &accountController{
-		context:      container,
-		service:      service.NewAccountService(container),
-		dummyAccount: model.NewAccountWithPlainPassword("test", "test", 1),
+		context: container,
+		service: service.NewAccountService(container),
 	}
 }
 
@@ -52,12 +49,12 @@ func (controller *accountController) GetLoginStatus(c echo.Context) error {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.Account "Success to fetch the account data. If the security function is disable, it returns the dummy data."
+// @Success 200 {object} model.Account "Success to fetch the account data. If the security function is disable, it returns disabled message"
 // @Failure 401 {boolean} bool "The current user haven't logged-in yet. Returns false."
 // @Router /auth/loginAccount [get]
 func (controller *accountController) GetLoginAccount(c echo.Context) error {
 	if !controller.context.GetConfig().Extension.SecurityEnabled {
-		return c.JSON(http.StatusOK, controller.dummyAccount)
+		return c.JSON(http.StatusOK, "Security is disabled")
 	}
 	return c.JSON(http.StatusOK, controller.context.GetSession().GetAccount())
 }

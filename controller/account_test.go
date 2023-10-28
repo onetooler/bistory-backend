@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
-	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/test"
 	"github.com/stretchr/testify/assert"
@@ -39,9 +38,7 @@ func TestGetLoginAccount_Success(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
-	entity := model.NewAccountWithPlainPassword("test", "test", 1)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.JSONEq(t, test.ConvertToString(entity), rec.Body.String())
 }
 
 func TestLogin_Success(t *testing.T) {

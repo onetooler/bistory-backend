@@ -93,7 +93,7 @@ func initTestLogger() logger.Logger {
 		fmt.Printf("Error")
 	}
 	sugar := zap.Sugar()
-	// set package varriable logger.
+
 	logger := logger.NewLogger(sugar)
 	logger.GetZapLogger().Infof("Success to read zap logger configuration")
 	_ = zap.Sync()
@@ -104,7 +104,6 @@ func initObservedLogger() (logger.Logger, *observer.ObservedLogs) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	sugar := zap.New(observedZapCore).Sugar()
 
-	// set package varriable logger.
 	logger := logger.NewLogger(sugar)
 	return logger, observedLogs
 }

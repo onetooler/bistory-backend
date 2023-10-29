@@ -33,6 +33,7 @@ type Session interface {
 	GetValue(key string) string
 	SetAccount(account *model.Account) error
 	GetAccount() *model.Account
+	HasAuthorizationTo(uint, model.Authority) bool
 }
 
 // NewSession is constructor.
@@ -117,4 +118,18 @@ func (s *session) GetAccount() *model.Account {
 		return a
 	}
 	return nil
+}
+
+func (s *session) HasAuthorizationTo(accountId uint, authorityLevel model.Authority) bool {
+	currentAccount := s.GetAccount()
+	if currentAccount == nil {
+		return false
+	}
+	if currentAccount.ID == accountId {
+		return true
+	}
+	if currentAccount.Authority < authorityLevel {
+		return true
+	}
+	return false
 }

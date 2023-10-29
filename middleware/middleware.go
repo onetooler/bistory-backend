@@ -179,7 +179,7 @@ func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if !hasAuthorization(c, container) {
-				return c.JSON(http.StatusUnauthorized, false)
+				return c.JSON(http.StatusForbidden, false)
 			}
 			if err := next(c); err != nil {
 				c.Error(err)
@@ -192,11 +192,9 @@ func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc
 // hasAuthorization judges whether the user has the right to access the path.
 func hasAuthorization(c echo.Context, container container.Container) bool {
 	currentPath := c.Path()
-
 	if !equalPath(currentPath, container.GetConfig().Security.AuthPath) {
 		return true
 	}
-
 	if equalPath(currentPath, container.GetConfig().Security.ExcludePath) {
 		return true
 	}
@@ -209,7 +207,7 @@ func hasAuthorization(c echo.Context, container container.Container) bool {
 		_ = container.GetSession().Save()
 		return true
 	}
-	if account.Authority == model.AuthorityUser && equalPath(currentPath, container.GetConfig().Security.UserPath) {
+	if account.Authority <= model.AuthorityUser && equalPath(currentPath, container.GetConfig().Security.UserPath) {
 		_ = container.GetSession().Save()
 		return true
 	}

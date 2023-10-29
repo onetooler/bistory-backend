@@ -81,12 +81,12 @@ func (controller *authController) Login(c echo.Context) error {
 	}
 
 	authorized, a := controller.service.AuthenticateByLoginIdAndPassword(dto.LoginId, dto.Password)
-	if authorized {
-		_ = sess.SetAccount(a)
-		_ = sess.Save()
-		return c.JSON(http.StatusOK, a)
+	if !authorized {
+		return c.JSON(http.StatusForbidden, false)
 	}
-	return c.NoContent(http.StatusUnauthorized)
+	sess.SetAccount(a)
+	sess.Save()
+	return c.JSON(http.StatusOK, a)
 }
 
 // Logout is the method to logout by http post.

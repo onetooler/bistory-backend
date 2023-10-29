@@ -3,7 +3,7 @@ database:
   host:  develop.db
   port:
   dbname: 
-  username: 
+  loginId: 
   password: 
   migration: true
 
@@ -13,7 +13,7 @@ extension:
   security_enabled: true
 
 log:
-  request_log_format: ${remote_ip} ${account_name} ${uri} ${method} ${status}
+  request_log_format: ${remote_ip} ${account_loginid} ${uri} ${method} ${status}
 
 staticcontents:
   enabled: true

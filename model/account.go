@@ -2,70 +2,49 @@ package model
 
 import (
 	"github.com/onetooler/bistory-backend/config"
-	"github.com/onetooler/bistory-backend/repository"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 // Account defines struct of account data.
 type Account struct {
-	ID          uint       `gorm:"primary_key" json:"id"`
-	Name        string     `json:"name"`
+	gorm.Model
+	LoginId     string     `gorm:"unique;not null" json:"login_id"`
+	Email 		string     `gorm:"unique;not null" json:"email"`
 	Password    string     `json:"-"`
-	AuthorityID uint       `json:"authority_id"`
-	Authority   *Authority `json:"authority"`
+	Authority 	Authority  `json:"authority"`
 }
 
-// RecordAccount defines struct represents the record of the database.
-type RecordAccount struct {
-	ID            uint
-	Name          string
-	Password      string
-	AuthorityID   uint
-	AuthorityName string
-}
+type Authority uint
 
-const selectAccount = "select a.id as id, a.name as name, a.password as password," +
-	" r.id as authority_id, r.name as authority_name " +
-	" from account_master a inner join authority_master r on a.authority_id = r.id "
+const (
+	AuthorityAdmin Authority = iota + 1
+	AuthorityUser
+)
+
+func (a Authority) String() string {
+    switch a {
+    case AuthorityAdmin:
+        return "Admin"
+    case AuthorityUser:
+        return "User"
+    default:
+        return "Invalid Authority"
+    }
+}
 
 // TableName returns the table name of account struct and it is used by gorm.
 func (Account) TableName() string {
-	return "account_master"
+	return "account"
 }
 
-// NewAccount is constructor.
-func NewAccount(name string, password string, authorityID uint) *Account {
-	return &Account{Name: name, Password: password, AuthorityID: authorityID}
-}
-
-// NewAccountWithPlainPassword is constructor. And it is encoded plain text password by using bcrypt.
-func NewAccountWithPlainPassword(name string, password string, authorityID uint) *Account {
-	hashed, _ := bcrypt.GenerateFromPassword([]byte(password), config.PasswordHashCost)
-	return &Account{Name: name, Password: string(hashed), AuthorityID: authorityID}
-}
-
-// FindByName returns accounts full matched given account name.
-func (a *Account) FindByName(rep repository.Repository, name string) (*Account, error) {
-	var account *Account
-
-	var rec RecordAccount
-	rep.Raw(selectAccount+" where a.name = ?", name).Scan(&rec)
-	account = convertToAccount(&rec)
-
-	return account, nil
-}
-
-// Create persists this account data.
-func (a *Account) Create(rep repository.Repository) (*Account, error) {
-	if err := rep.Select("name", "password", "authority_id").Create(a).Error; err != nil {
+// NewAccountWithPasswordEncrypt is constructor. And it is encoded password by using bcrypt.
+func NewAccountWithPasswordEncrypt(loginId, email, plainPassword string, authority Authority) (*Account, error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(plainPassword), config.PasswordHashCost)
+	if err != nil {
 		return nil, err
 	}
-	return a, nil
-}
-
-func convertToAccount(rec *RecordAccount) *Account {
-	r := &Authority{ID: rec.AuthorityID, Name: rec.AuthorityName}
-	return &Account{ID: rec.ID, Name: rec.Name, Password: rec.Password, AuthorityID: rec.AuthorityID, Authority: r}
+	return &Account{LoginId: loginId, Email: email, Password: string(hashed), Authority: authority}, nil
 }
 
 // ToString is return string of object

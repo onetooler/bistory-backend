@@ -9,97 +9,106 @@ import (
 	"github.com/onetooler/bistory-backend/service"
 )
 
-// AccountController is a controller for managing user account.
+// AccountController is a controller for managing accounts.
 type AccountController interface {
-	GetLoginStatus(c echo.Context) error
-	GetLoginAccount(c echo.Context) error
-	Login(c echo.Context) error
-	Logout(c echo.Context) error
+	GetAccount(c echo.Context) error
+	CreateAccount(c echo.Context) error
+	UpdateAccount(c echo.Context) error
+	DeleteAccount(c echo.Context) error
 }
 
 type accountController struct {
-	context container.Container
-	service service.AccountService
+	container container.Container
+	service   service.AccountService
 }
 
 // NewAccountController is constructor.
 func NewAccountController(container container.Container) AccountController {
-	return &accountController{
-		context: container,
-		service: service.NewAccountService(container),
+	return &accountController{container: container, service: service.NewAccountService(container)}
+}
+
+// GetAccount returns one record matched account's id.
+// @Summary Get a account
+// @Description Get a account
+// @Tags Accounts
+// @Accept  json
+// @Produce  json
+// @Param account_id path int true "Account ID"
+// @Success 200 {object} model.Account "Success to fetch data."
+// @Failure 400 {string} message "Failed to fetch data."
+// @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
+// @Router /accounts/{account_id} [get]
+func (controller *accountController) GetAccount(c echo.Context) error {
+	account, err := controller.service.FindByLoginId(c.Param("id"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
+	return c.JSON(http.StatusOK, account)
 }
 
-// GetLoginStatus returns the status of login.
-// @Summary Get the login status.
-// @Description Get the login status of current logged-in user.
-// @Tags Auth
+// CreateAccount create a new account by http post.
+// @Summary Create a new account
+// @Description Create a new account
+// @Tags Accounts
 // @Accept  json
 // @Produce  json
-// @Success 200 {boolean} bool "The current user have already logged-in. Returns true."
-// @Failure 401 {boolean} bool "The current user haven't logged-in yet. Returns false."
-// @Router /auth/loginStatus [get]
-func (controller *accountController) GetLoginStatus(c echo.Context) error {
-	return c.JSON(http.StatusOK, true)
-}
+// @Param data body dto.CreateAccountDto true "a new account data for creating"
+// @Success 200 {object} model.Account "Success to create a new account."
+// @Failure 400 {string} message "Failed to the registration."
+// @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
+// @Router /accounts [post]
+func (controller *accountController) CreateAccount(c echo.Context) error {
+	dto := dto.NewCreateAccountDto()
+	if err := c.Bind(dto); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 
-// GetLoginAccount returns the account data of logged in user.
-// @Summary Get the account data of logged-in user.
-// @Description Get the account data of logged-in user.
-// @Tags Auth
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} model.Account "Success to fetch the account data. If the security function is disable, it returns disabled message"
-// @Failure 401 {boolean} bool "The current user haven't logged-in yet. Returns false."
-// @Router /auth/loginAccount [get]
-func (controller *accountController) GetLoginAccount(c echo.Context) error {
-	if !controller.context.GetConfig().Extension.SecurityEnabled {
-		return c.JSON(http.StatusOK, "Security is disabled")
 	}
-	return c.JSON(http.StatusOK, controller.context.GetSession().GetAccount())
+	account, err := controller.service.CreateAccount(dto)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, account)
 }
 
-// Login is the method to login using username and password by http post.
-// @Summary Login using username and password.
-// @Description Login using username and password.
-// @Tags Auth
+// UpdateAccount update the existing account by http put.
+// @Summary Update the existing account
+// @Description Update the existing account
+// @Tags Accounts
 // @Accept  json
 // @Produce  json
-// @Param data body dto.LoginDto true "User name and Password for logged-in."
-// @Success 200 {object} model.Account "Success to the authentication."
-// @Failure 401 {boolean} bool "Failed to the authentication."
-// @Router /auth/login [post]
-func (controller *accountController) Login(c echo.Context) error {
-	dto := dto.NewLoginDto()
+// @Param account_id path int true "Account ID"
+// @Param data body dto.UpdatePasswordDto true "the account data for updating"
+// @Success 200 {object} model.Account "Success to update the existing account."
+// @Failure 400 {string} message "Failed to the update."
+// @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
+// @Router /accounts/{account_id} [put]
+func (controller *accountController) UpdateAccount(c echo.Context) error {
+	dto := dto.NewUpdatePasswordDto()
 	if err := c.Bind(dto); err != nil {
 		return c.JSON(http.StatusBadRequest, dto)
 	}
-
-	sess := controller.context.GetSession()
-	if account := sess.GetAccount(); account != nil {
-		return c.JSON(http.StatusOK, account)
+	account, result := controller.service.UpdateAccountPassword(c.Param("id"), dto)
+	if result != nil {
+		return c.JSON(http.StatusBadRequest, result)
 	}
-
-	authenticate, a := controller.service.AuthenticateByUsernameAndPassword(dto.UserName, dto.Password)
-	if authenticate {
-		_ = sess.SetAccount(a)
-		_ = sess.Save()
-		return c.JSON(http.StatusOK, a)
-	}
-	return c.NoContent(http.StatusUnauthorized)
+	return c.JSON(http.StatusOK, account)
 }
 
-// Logout is the method to logout by http post.
-// @Summary Logout.
-// @Description Logout.
-// @Tags Auth
+// DeleteAccount deletes the existing account by http delete.
+// @Summary Delete the existing account
+// @Description Delete the existing account
+// @Tags Accounts
 // @Accept  json
 // @Produce  json
-// @Success 200
-// @Router /auth/logout [post]
-func (controller *accountController) Logout(c echo.Context) error {
-	sess := controller.context.GetSession()
-	_ = sess.SetAccount(nil)
-	_ = sess.Delete()
-	return c.NoContent(http.StatusOK)
+// @Param account_id path int true "Account ID"
+// @Success 200 {object} model.Account "Success to delete the existing account."
+// @Failure 400 {string} message "Failed to the delete."
+// @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
+// @Router /accounts/{account_id} [delete]
+func (controller *accountController) DeleteAccount(c echo.Context) error {
+	account, result := controller.service.DeleteAccount(c.Param("id"))
+	if result != nil {
+		return c.JSON(http.StatusBadRequest, result)
+	}
+	return c.JSON(http.StatusOK, account)
 }

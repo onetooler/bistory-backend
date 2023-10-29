@@ -8,13 +8,9 @@ import (
 // InitMasterData creates the master data used in this application.
 func InitMasterData(container container.Container) {
 	if container.GetConfig().Extension.MasterGenerator {
-		rep := container.GetRepository()
+		repp := container.GetRepository()
 
-		r := model.NewAuthority("Admin")
-		_, _ = r.Create(rep)
-		a := model.NewAccountWithPlainPassword("test", "test", r.ID)
-		_, _ = a.Create(rep)
-		a = model.NewAccountWithPlainPassword("test2", "test2", r.ID)
-		_, _ = a.Create(rep)
+		adminAccount, _ := model.NewAccountWithPasswordEncrypt("test", "test@example.com", "test", model.AuthorityAdmin)
+		repp.Create(adminAccount)
 	}
 }

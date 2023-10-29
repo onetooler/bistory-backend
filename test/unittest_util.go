@@ -72,7 +72,7 @@ func createConfig(isSecurity bool) *config.Config {
 	conf.Database.Migration = true
 	conf.Extension.MasterGenerator = true
 	conf.Extension.SecurityEnabled = isSecurity
-	conf.Log.RequestLogFormat = "${remote_ip} ${account_name} ${uri} ${method} ${status}"
+	conf.Log.RequestLogFormat = "${remote_ip} ${account_loginid} ${uri} ${method} ${status}"
 	return conf
 }
 
@@ -134,13 +134,13 @@ func createLoggerConfig() zap.Config {
 }
 
 // ConvertToString func converts model to string.
-func ConvertToString(model interface{}) string {
+func ConvertToString(model any) string {
 	bytes, _ := json.Marshal(model)
 	return string(bytes)
 }
 
 // NewJSONRequest func creates a new request using JSON format.
-func NewJSONRequest(method string, target string, param interface{}) *http.Request {
+func NewJSONRequest(method string, target string, param any) *http.Request {
 	req := httptest.NewRequest(method, target, strings.NewReader(ConvertToString(param)))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")

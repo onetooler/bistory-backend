@@ -3,7 +3,7 @@ database:
   host: postgres-db
   port: 5432
   dbname: testdb
-  username: testusr
+  loginId: testusr
   password: testusr
   migration: false
 
@@ -13,7 +13,7 @@ extension:
   security_enabled: true
 
 log:
-  request_log_format: ${remote_ip} ${account_name} ${uri} ${method} ${status}
+  request_log_format: ${remote_ip} ${account_loginid} ${uri} ${method} ${status}
 
 security:
   auth_path:

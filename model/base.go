@@ -4,7 +4,7 @@ import "encoding/json"
 
 // DomainObject defines the common interface for domain models.
 type DomainObject interface {
-	Account | Authority
+	TableName() string
 }
 
 // toString returns the JSON data of the domain models.

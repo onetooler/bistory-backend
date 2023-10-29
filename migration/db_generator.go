@@ -11,9 +11,7 @@ func CreateDatabase(container container.Container) {
 		db := container.GetRepository()
 
 		_ = db.DropTableIfExists(&model.Account{})
-		_ = db.DropTableIfExists(&model.Authority{})
 
 		_ = db.AutoMigrate(&model.Account{})
-		_ = db.AutoMigrate(&model.Authority{})
 	}
 }

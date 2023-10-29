@@ -18,6 +18,7 @@ func Init(e *echo.Echo, container container.Container) {
 	setCORSConfig(e, container)
 
 	setErrorController(e, container)
+	setAuthController(e, container)
 	setAccountController(e, container)
 	setHealthController(e, container)
 
@@ -53,15 +54,23 @@ func setErrorController(e *echo.Echo, container container.Container) {
 	e.Use(middleware.Recover())
 }
 
-func setAccountController(e *echo.Echo, container container.Container) {
-	account := controller.NewAccountController(container)
-	e.GET(config.APIAccountLoginStatus, func(c echo.Context) error { return account.GetLoginStatus(c) })
-	e.GET(config.APIAccountLoginAccount, func(c echo.Context) error { return account.GetLoginAccount(c) })
+func setAuthController(e *echo.Echo, container container.Container) {
+	auth := controller.NewAuthController(container)
+	e.GET(config.APIAuthLoginStatus, func(c echo.Context) error { return auth.GetLoginStatus(c) })
+	e.GET(config.APIAuthLoginAccount, func(c echo.Context) error { return auth.GetLoginAccount(c) })
 
 	if container.GetConfig().Extension.SecurityEnabled {
-		e.POST(config.APIAccountLogin, func(c echo.Context) error { return account.Login(c) })
-		e.POST(config.APIAccountLogout, func(c echo.Context) error { return account.Logout(c) })
+		e.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
+		e.POST(config.APIAuthLogout, func(c echo.Context) error { return auth.Logout(c) })
 	}
+}
+
+func setAccountController(e *echo.Echo, container container.Container) {
+	account := controller.NewAccountController(container)
+	e.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
+	e.GET(config.APIAccountIdPath, func(c echo.Context) error { return account.GetAccount(c) })
+	e.PUT(config.APIAccountIdPath, func(c echo.Context) error { return account.UpdateAccount(c) })
+	e.DELETE(config.APIAccountIdPath, func(c echo.Context) error { return account.DeleteAccount(c) })
 }
 
 func setHealthController(e *echo.Echo, container container.Container) {

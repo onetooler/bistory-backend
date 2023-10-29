@@ -21,16 +21,20 @@ const (
 )
 
 const (
-	// APIAccount represents the group of auth management API.
-	APIAccount = API + "/auth"
-	// APIAccountLoginStatus represents the API to get the status of logged in account.
-	APIAccountLoginStatus = APIAccount + "/loginStatus"
-	// APIAccountLoginAccount represents the API to get the logged in account.
-	APIAccountLoginAccount = APIAccount + "/loginAccount"
-	// APIAccountLogin represents the API to login by session authentication.
-	APIAccountLogin = APIAccount + "/login"
-	// APIAccountLogout represents the API to logout.
-	APIAccountLogout = APIAccount + "/logout"
+	// APIAuth represents the group of auth management API.
+	// APIAuth is a part of account but separate API for concentrate scope
+	APIAuth = API + "/auth"
+	APIAuthLoginStatus = APIAuth + "/loginStatus"
+	APIAuthLoginAccount = APIAuth + "/loginAccount"
+	APIAuthLogin = APIAuth + "/login"
+	APIAuthLogout = APIAuth + "/logout"
+)
+
+const (
+	// APIAccount represents the group of account management API.
+	APIAccount = API + "/account"
+	APIAccountIdParam = "id"
+	APIAccountIdPath = APIAccount + "/:" + APIAccountIdParam
 )
 
 const (

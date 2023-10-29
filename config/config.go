@@ -17,7 +17,7 @@ type Config struct {
 		Host      string `default:"develop.db"`
 		Port      string
 		Dbname    string
-		Username  string
+		LoginId   string
 		Password  string
 		Migration bool `default:"false"`
 	}
@@ -33,7 +33,7 @@ type Config struct {
 		SecurityEnabled bool `yaml:"security_enabled" default:"false"`
 	}
 	Log struct {
-		RequestLogFormat string `yaml:"request_log_format" default:"${remote_ip} ${account_name} ${uri} ${method} ${status}"`
+		RequestLogFormat string `yaml:"request_log_format" default:"${remote_ip} ${account_loginid} ${uri} ${method} ${status}"`
 	}
 	StaticContents struct {
 		Enabled bool `default:"false"`

@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	echomd "github.com/labstack/echo/v4/middleware"
 	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
 	"github.com/valyala/fasttemplate"
 	"gopkg.in/boj/redistore.v1"
 )
@@ -23,6 +25,7 @@ var authorizationPathRegexps map [string]*regexp.Regexp
 func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
 	e.Use(RequestLoggerMiddleware(container))
 	e.Use(ActionLoggerMiddleware(container))
+	e.Use(BodyLoggerMiddleware(container))
 }
 
 // InitSessionMiddleware initialize a middleware for session management.
@@ -69,9 +72,9 @@ func RequestLoggerMiddleware(container container.Container) echo.MiddlewareFunc 
 				switch tag {
 				case "remote_ip":
 					return w.Write([]byte(c.RealIP()))
-				case "account_name":
+				case "account_loginid":
 					if account := container.GetSession().GetAccount(); account != nil {
-						return w.Write([]byte(account.Name))
+						return w.Write([]byte(account.LoginId))
 					}
 					return w.Write([]byte("None"))
 				case "uri":
@@ -96,14 +99,30 @@ func ActionLoggerMiddleware(container container.Container) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			logger := container.GetLogger()
-			logger.GetZapLogger().Debugf(c.Path() + " Action Start")
+			logger.GetZapLogger().Debugf("%s Action Start", c.Path())
 			if err := next(c); err != nil {
 				c.Error(err)
 			}
-			logger.GetZapLogger().Debugf(c.Path() + " Action End")
+			logger.GetZapLogger().Debugf("%s Action End", c.Path())
 			return nil
 		}
 	}
+}
+
+func BodyLoggerMiddleware(container container.Container) echo.MiddlewareFunc {
+	return echomd.BodyDumpWithConfig(
+		echomd.BodyDumpConfig{
+			Skipper: func(c echo.Context) bool {
+				return strings.Contains(c.Request().URL.Path, "swagger")
+			},
+			Handler: func(c echo.Context, reqBody []byte, resBody []byte) {
+				logger := container.GetLogger()
+				logger.GetZapLogger().Debugf("%s request body: %s", c.Path(), reqBody)
+				logger.GetZapLogger().Debugf("%s response body: %s", c.Path(), resBody)
+			},
+		
+		},	
+	)
 }
 
 // SessionMiddleware is a middleware for setting a context to a session.
@@ -143,6 +162,7 @@ func StaticContentsMiddleware(e *echo.Echo, container container.Container, stati
 // AuthenticationMiddleware is the middleware of session authentication for echo.
 func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc {
 	// pre-compile all paths
+	authorizationPathRegexps = make(map[string]*regexp.Regexp)
 	for _, path := range container.GetConfig().Security.AuthPath {
 		authorizationPathRegexps[path] = regexp.MustCompile(path)
 	}
@@ -185,11 +205,11 @@ func hasAuthorization(c echo.Context, container container.Container) bool {
 	if account == nil {
 		return false
 	}
-	if account.Authority.Name == "Admin" && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
+	if account.Authority == model.AuthorityAdmin && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
 		_ = container.GetSession().Save()
 		return true
 	}
-	if account.Authority.Name == "User" && equalPath(currentPath, container.GetConfig().Security.UserPath) {
+	if account.Authority == model.AuthorityUser && equalPath(currentPath, container.GetConfig().Security.UserPath) {
 		_ = container.GetSession().Save()
 		return true
 	}

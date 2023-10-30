@@ -9,7 +9,7 @@ import (
 // Account defines struct of account data.
 type Account struct {
 	gorm.Model
-	LoginId   string    `gorm:"unique;not null" json:"login_id"`
+	LoginId   string    `gorm:"unique;not null" json:"loginId"`
 	Email     string    `gorm:"unique;not null" json:"email"`
 	Password  string    `json:"-"`
 	Authority Authority `json:"authority"`

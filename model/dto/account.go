@@ -32,15 +32,16 @@ func (l *LoginDto) ToString() (string, error) {
 	return string(bytes), err
 }
 
-type UpdatePasswordDto struct {
-	Password string `json:"password"`
+type ChangeAccountPasswordDto struct {
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"NewPassword"`
 }
 
-func NewUpdatePasswordDto() *UpdatePasswordDto {
-	return &UpdatePasswordDto{}
+func NewChangeAccountPasswordDto() *ChangeAccountPasswordDto {
+	return &ChangeAccountPasswordDto{}
 }
 
-func (l *UpdatePasswordDto) ToString() (string, error) {
+func (l *ChangeAccountPasswordDto) ToString() (string, error) {
 	bytes, err := json.Marshal(l)
 	return string(bytes), err
 }

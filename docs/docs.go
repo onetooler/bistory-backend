@@ -65,7 +65,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/account/{account_id}": {
+        "/account/{accountId}": {
             "get": {
                 "description": "Get a account",
                 "consumes": [
@@ -82,7 +82,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Account ID",
-                        "name": "account_id",
+                        "name": "accountId",
                         "in": "path",
                         "required": true
                     }
@@ -96,57 +96,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Failed to fetch data.",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Failed to the authentication. Returns false.",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update the existing account",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Account"
-                ],
-                "summary": "Update the existing account",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Account ID",
-                        "name": "account_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "the account data for updating",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.UpdatePasswordDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success to update the existing account.",
-                        "schema": {
-                            "$ref": "#/definitions/model.Account"
-                        }
-                    },
-                    "400": {
-                        "description": "Failed to the update.",
                         "schema": {
                             "type": "string"
                         }
@@ -175,7 +124,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Account ID",
-                        "name": "account_id",
+                        "name": "accountId",
                         "in": "path",
                         "required": true
                     }
@@ -189,6 +138,59 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Failed to the delete.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Failed to the authentication. Returns false.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/{accountId}/": {
+            "post": {
+                "description": "Change account password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Change account password",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the account password data for updating",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChangeAccountPasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success to change the account password.",
+                        "schema": {
+                            "$ref": "#/definitions/model.Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to the update.",
                         "schema": {
                             "type": "string"
                         }
@@ -351,6 +353,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.ChangeAccountPasswordDto": {
+            "type": "object",
+            "properties": {
+                "NewPassword": {
+                    "type": "string"
+                },
+                "oldPassword": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateAccountDto": {
             "type": "object",
             "properties": {
@@ -374,14 +387,6 @@ const docTemplate = `{
                 "loginId": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UpdatePasswordDto": {
-            "type": "object",
-            "properties": {
                 "password": {
                     "type": "string"
                 }
@@ -417,7 +422,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "login_id": {
+                "loginId": {
                     "type": "string"
                 },
                 "updatedAt": {

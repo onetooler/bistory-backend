@@ -51,13 +51,7 @@ func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
 func TestAccountGet_Success(t *testing.T) {
 	container := test.PrepareForServiceTest()
 	service := NewAccountService(container)
-
-	createDto := dto.CreateAccountDto{
-		LoginId:  "newTest",
-		Email:    "newTest@example.com",
-		Password: "newTestTest",
-	}
-	savedAccount, _ := service.CreateAccount(&createDto)
+	savedAccount := createSuccessAccount(service)
 
 	account, err := service.GetAccount(savedAccount.ID)
 	assert.Nil(t, err)
@@ -67,7 +61,7 @@ func TestAccountGet_Success(t *testing.T) {
 	assert.EqualValues(t, savedAccount, account)
 }
 
-func TestAccountGet_FailureNotExistsId(t *testing.T) {
+func TestAccountGet_NotExistsIdFailure(t *testing.T) {
 	container := test.PrepareForServiceTest()
 	service := NewAccountService(container)
 
@@ -76,12 +70,43 @@ func TestAccountGet_FailureNotExistsId(t *testing.T) {
 	assert.Nil(t, account)
 }
 
-// func TestAuthenticateByLoginIdAndPassword_EntityNotFound(t *testing.T) {
-// 	container := test.PrepareForServiceTest()
+func TestChangeAccountPassword_Success(t *testing.T) {
+	container := test.PrepareForServiceTest()
 
-// 	service := NewAccountService(container)
-// 	result, account := service.AuthenticateByLoginIdAndPassword("abcde", "abcde")
+	service := NewAccountService(container)
+	savedAccount := createSuccessAccount(service)
 
-// 	assert.Nil(t, account)
-// 	assert.False(t, result)
-// }
+	changeAccountPasswordDto := dto.ChangeAccountPasswordDto{
+		OldPassword: "newTestTest",
+		NewPassword: "newTestTestTest",
+	}
+	account, err := service.ChangeAccountPassword(savedAccount.ID, &changeAccountPasswordDto)
+	assert.Nil(t, err)
+	assert.NotNil(t, account)
+	assert.NotEqual(t, savedAccount.UpdatedAt, account.UpdatedAt)
+}
+
+func TestChangeAccountPassword_WrongPasswordFailure(t *testing.T) {
+	container := test.PrepareForServiceTest()
+
+	service := NewAccountService(container)
+	savedAccount := createSuccessAccount(service)
+
+	changeAccountPasswordDto := dto.ChangeAccountPasswordDto{
+		OldPassword: "newTestTest",
+		NewPassword: "new",
+	}
+	account, err := service.ChangeAccountPassword(savedAccount.ID, &changeAccountPasswordDto)
+	assert.NotNil(t, err)
+	assert.Nil(t, account)
+}
+
+func createSuccessAccount(service AccountService) *model.Account {
+	createDto := dto.CreateAccountDto{
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
+		Password: "newTestTest",
+	}
+	savedAccount, _ := service.CreateAccount(&createDto)
+	return savedAccount
+}

@@ -69,7 +69,7 @@ func setAccountController(e *echo.Echo, container container.Container) {
 	account := controller.NewAccountController(container)
 	e.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
 	e.GET(config.APIAccountIdPath, func(c echo.Context) error { return account.GetAccount(c) })
-	e.PUT(config.APIAccountIdPath, func(c echo.Context) error { return account.UpdateAccount(c) })
+	e.POST(config.APIAccountChangePassword, func(c echo.Context) error { return account.ChangeAccountPassword(c) })
 	e.DELETE(config.APIAccountIdPath, func(c echo.Context) error { return account.DeleteAccount(c) })
 }
 

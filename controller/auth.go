@@ -18,15 +18,15 @@ type AuthController interface {
 }
 
 type authController struct {
-	context container.Container
-	service service.AuthService
+	container container.Container
+	service   service.AuthService
 }
 
 // NewAuthController is constructor.
 func NewAuthController(container container.Container) AuthController {
 	return &authController{
-		context: container,
-		service: service.NewAuthService(container),
+		container: container,
+		service:   service.NewAuthService(container),
 	}
 }
 
@@ -53,10 +53,10 @@ func (controller *authController) GetLoginStatus(c echo.Context) error {
 // @Failure 401 {boolean} bool "The current user haven't logged-in yet. Returns false."
 // @Router /auth/loginAccount [get]
 func (controller *authController) GetLoginAccount(c echo.Context) error {
-	if !controller.context.GetConfig().Extension.SecurityEnabled {
+	if !controller.container.GetConfig().Extension.SecurityEnabled {
 		return c.JSON(http.StatusOK, "Security is disabled")
 	}
-	return c.JSON(http.StatusOK, controller.context.GetSession().GetAccount())
+	return c.JSON(http.StatusOK, controller.container.GetSession().GetAccount())
 }
 
 // Login is the method to login using loginId and password by http post.
@@ -75,7 +75,7 @@ func (controller *authController) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto)
 	}
 
-	sess := controller.context.GetSession()
+	sess := controller.container.GetSession()
 	if account := sess.GetAccount(); account != nil {
 		return c.JSON(http.StatusOK, account)
 	}
@@ -84,8 +84,7 @@ func (controller *authController) Login(c echo.Context) error {
 	if !authorized {
 		return c.JSON(http.StatusForbidden, false)
 	}
-	_ = sess.SetAccount(a)
-	_ = sess.Save()
+	_ = sess.Login(a)
 	return c.JSON(http.StatusOK, a)
 }
 
@@ -98,8 +97,6 @@ func (controller *authController) Login(c echo.Context) error {
 // @Success 200
 // @Router /auth/logout [post]
 func (controller *authController) Logout(c echo.Context) error {
-	sess := controller.context.GetSession()
-	_ = sess.SetAccount(nil)
-	_ = sess.Delete()
+	_ = controller.container.GetSession().Logout()
 	return c.NoContent(http.StatusOK)
 }

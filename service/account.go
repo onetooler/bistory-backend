@@ -6,13 +6,14 @@ import (
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
+	"gorm.io/gorm/clause"
 )
 
 // AccountService is a service for managing user account.
 type AccountService interface {
-	CreateAccount(createAccountDto *dto.CreateAccountDto) (*model.Account, error)
+	CreateAccount(*dto.CreateAccountDto) (*model.Account, error)
 	GetAccount(id uint) (*model.Account, error)
-	UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error)
+	ChangeAccountPassword(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	DeleteAccount(id uint) (bool, error)
 }
 
@@ -36,11 +37,8 @@ func (a *accountService) CreateAccount(createAccountDto *dto.CreateAccountDto) (
 	}
 
 	// password validation
-	if len(createAccountDto.Password) < 8 {
-		return nil, fmt.Errorf("password must be at least 8 characters")
-	}
-	if len(createAccountDto.Password) > 72 {
-		return nil, fmt.Errorf("password must be at most 72 characters")
+	if err := a.validatePassword(createAccountDto.Password); err != nil {
+		return nil, err
 	}
 
 	// create account
@@ -69,18 +67,23 @@ func (a *accountService) GetAccount(id uint) (*model.Account, error) {
 	return &account, nil
 }
 
-func (a *accountService) UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error) {
-	// password validation
-	if len(UpdatePasswordDto.Password) < 8 {
-		a.container.GetLogger().GetZapLogger().Errorf("password must be at least 8 characters")
-		return false, nil
+func (a *accountService) ChangeAccountPassword(id uint, changeAccountPasswordDto *dto.ChangeAccountPasswordDto) (*model.Account, error) {
+	// OldPassword validation
+	account, err := a.GetAccount(id)
+	if err != nil {
+		return nil, err
 	}
-	if len(UpdatePasswordDto.Password) > 72 {
-		a.container.GetLogger().GetZapLogger().Errorf("password must be at most 72 characters")
-		return false, nil
+	ok := account.CheckPassword(changeAccountPasswordDto.OldPassword)
+	if !ok {
+		return nil, fmt.Errorf("old password is not valid")
 	}
 
-	return a.updatePassword(id, UpdatePasswordDto.Password)
+	// NewPassword validation
+	if err := a.validatePassword(changeAccountPasswordDto.NewPassword); err != nil {
+		return nil, err
+	}
+
+	return a.updatePassword(id, changeAccountPasswordDto.NewPassword)
 }
 
 func (a *accountService) DeleteAccount(id uint) (bool, error) {
@@ -104,7 +107,7 @@ func (a *accountService) existsByLoginId(loginId string) (bool, error) {
 	return exists, tx.Error
 }
 
-func (a *accountService) FindByLoginId(loginId string) (*model.Account, error) {
+func (a *accountService) GetAccountByLoginId(loginId string) (*model.Account, error) {
 	repo := a.container.GetRepository()
 
 	account := model.Account{LoginId: loginId}
@@ -125,15 +128,25 @@ func (a *accountService) create(account *model.Account) error {
 	return nil
 }
 
-func (a *accountService) updatePassword(id uint, password string) (bool, error) {
+func (a *accountService) updatePassword(id uint, password string) (*model.Account, error) {
 	repo := a.container.GetRepository()
 
 	account := model.Account{}
 	account.ID = id
-	tx := repo.Model(&account).Update("password", password)
+	tx := repo.Model(&account).Clauses(clause.Returning{}).Update("password", password)
 	if tx.Error != nil {
-		return false, tx.Error
+		return nil, tx.Error
 	}
 
-	return true, nil
+	return &account, nil
+}
+
+func (a *accountService) validatePassword(password string) error {
+	if len(password) < 8 {
+		return fmt.Errorf("password must be at least 8 characters")
+	}
+	if len(password) > 72 {
+		return fmt.Errorf("password must be at most 72 characters")
+	}
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -21,7 +22,7 @@ import (
 
 type mockService struct {
 	createAccount         func(*dto.CreateAccountDto) (*model.Account, error)
-	updateAccountPassword func(uint, *dto.UpdatePasswordDto) (bool, error)
+	changeAccountPassword func(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	deleteAccount         func(uint) (bool, error)
 	getAccount            func(uint) (*model.Account, error)
 }
@@ -30,8 +31,8 @@ func (m *mockService) CreateAccount(createAccountDto *dto.CreateAccountDto) (*mo
 	return m.createAccount(createAccountDto)
 }
 
-func (m *mockService) UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error) {
-	return m.updateAccountPassword(id, UpdatePasswordDto)
+func (m *mockService) ChangeAccountPassword(id uint, UpdatePasswordDto *dto.ChangeAccountPasswordDto) (*model.Account, error) {
+	return m.changeAccountPassword(id, UpdatePasswordDto)
 }
 
 func (m *mockService) DeleteAccount(id uint) (bool, error) {
@@ -252,6 +253,68 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+
+	bodyBool, _ := strconv.ParseBool(rec.Body.String())
+	assert.False(t, bodyBool)
+}
+
+func TestChangeAccountPassword_Success(t *testing.T) {
+	router, container := test.PrepareForControllerTest(true)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			changeAccountPassword: func(accountId uint, changeAccountPasswordDto *dto.ChangeAccountPasswordDto) (*model.Account, error) {
+				return &testAccount, nil
+			},
+		},
+	}
+	router.POST(config.APIAccountChangePassword, func(c echo.Context) error {
+		login(container, testAccount)
+		return account.ChangeAccountPassword(c)
+	})
+
+	req := test.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	body := model.Account{}
+	err := json.Unmarshal(rec.Body.Bytes(), &body)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, body)
+	assert.NotEmpty(t, body.ID)
+	assert.Equal(t, model.AuthorityUser, body.Authority)
+	assert.Equal(t, "newTest", body.LoginId)
+	assert.Equal(t, "newTest@example.com", body.Email)
+	assert.NotEmpty(t, body.CreatedAt)
+	assert.Empty(t, body.Password)
+}
+
+func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
+	router, container := test.PrepareForControllerTest(true)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			changeAccountPassword: func(accountId uint, changeAccountPasswordDto *dto.ChangeAccountPasswordDto) (*model.Account, error) {
+				return &testAccount, nil
+			},
+		},
+	}
+	router.POST(config.APIAccountChangePassword, func(c echo.Context) error {
+		return account.ChangeAccountPassword(c)
+	})
+
+	req := test.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 
 	bodyBool, _ := strconv.ParseBool(rec.Body.String())

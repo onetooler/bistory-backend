@@ -16,7 +16,7 @@ import (
 type AccountController interface {
 	GetAccount(c echo.Context) error
 	CreateAccount(c echo.Context) error
-	UpdateAccount(c echo.Context) error
+	ChangeAccountPassword(c echo.Context) error
 	DeleteAccount(c echo.Context) error
 }
 
@@ -36,11 +36,11 @@ func NewAccountController(container container.Container) AccountController {
 // @Tags Account
 // @Accept  json
 // @Produce  json
-// @Param account_id path int true "Account ID"
+// @Param accountId path int true "Account ID"
 // @Success 200 {object} model.Account "Success to fetch data."
 // @Failure 400 {string} message "Failed to fetch data."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /account/{account_id} [get]
+// @Router /account/{accountId} [get]
 func (controller *accountController) GetAccount(c echo.Context) error {
 	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
 	if accountId == 0 {
@@ -83,19 +83,19 @@ func (controller *accountController) CreateAccount(c echo.Context) error {
 	return c.JSON(http.StatusOK, account)
 }
 
-// UpdateAccount update the existing account by http put.
-// @Summary Update the existing account
-// @Description Update the existing account
+// ChangeAccountPassword change account password by http post.
+// @Summary Change account password
+// @Description Change account password
 // @Tags Account
 // @Accept  json
 // @Produce  json
-// @Param account_id path int true "Account ID"
-// @Param data body dto.UpdatePasswordDto true "the account data for updating"
-// @Success 200 {object} model.Account "Success to update the existing account."
+// @Param accountId path int true "Account ID"
+// @Param data body dto.ChangeAccountPasswordDto true "the account password data for updating"
+// @Success 200 {object} model.Account "Success to change the account password."
 // @Failure 400 {string} message "Failed to the update."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /account/{account_id} [put]
-func (controller *accountController) UpdateAccount(c echo.Context) error {
+// @Router /account/{accountId}/ [post]
+func (controller *accountController) ChangeAccountPassword(c echo.Context) error {
 	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
@@ -104,14 +104,16 @@ func (controller *accountController) UpdateAccount(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
-	dto := dto.NewUpdatePasswordDto()
+	dto := dto.NewChangeAccountPasswordDto()
 	if err := c.Bind(dto); err != nil {
-		return c.JSON(http.StatusBadRequest, dto)
+		return c.String(http.StatusBadRequest, err.Error())
 	}
-	account, result := controller.service.UpdateAccountPassword(accountId, dto)
-	if result != nil {
-		return c.JSON(http.StatusBadRequest, result)
+	account, err := controller.service.ChangeAccountPassword(accountId, dto)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
+
+	_ = controller.container.GetSession().Logout()
 	return c.JSON(http.StatusOK, account)
 }
 
@@ -121,11 +123,11 @@ func (controller *accountController) UpdateAccount(c echo.Context) error {
 // @Tags Account
 // @Accept  json
 // @Produce  json
-// @Param account_id path int true "Account ID"
+// @Param accountId path int true "Account ID"
 // @Success 200 {object} model.Account "Success to delete the existing account."
 // @Failure 400 {string} message "Failed to the delete."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /account/{account_id} [delete]
+// @Router /account/{accountId} [delete]
 func (controller *accountController) DeleteAccount(c echo.Context) error {
 	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
 	if accountId == 0 {

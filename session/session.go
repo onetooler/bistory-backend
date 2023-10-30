@@ -33,6 +33,8 @@ type Session interface {
 	GetValue(key string) string
 	SetAccount(account *model.Account) error
 	GetAccount() *model.Account
+	Login(account *model.Account) error
+	Logout() error
 	HasAuthorizationTo(uint, model.Authority) bool
 }
 
@@ -103,6 +105,26 @@ func (s *session) GetValue(key string) string {
 		}
 	}
 	return ""
+}
+
+func (s *session) Login(account *model.Account) error {
+	if err := s.SetAccount(account); err != nil {
+		return err
+	}
+	if err := s.Save(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *session) Logout() error {
+	if err := s.SetAccount(nil); err != nil {
+		return err
+	}
+	if err := s.Delete(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // SetAccount sets account data in session.

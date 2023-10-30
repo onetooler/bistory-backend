@@ -7,7 +7,7 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
   - repo: https://github.com/lietu/go-pre-commit
-    rev: master
+    rev: 8d00896a7688eee84144b644d79c63a027ac6516
     hooks:
       - id: errcheck
       - id: gofumpt

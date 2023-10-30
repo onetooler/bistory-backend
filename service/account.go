@@ -11,9 +11,9 @@ import (
 // AccountService is a service for managing user account.
 type AccountService interface {
 	CreateAccount(createAccountDto *dto.CreateAccountDto) (*model.Account, error)
-	UpdateAccountPassword(loginId string, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error)
-	DeleteAccount(loginId string) (bool, error)
-	FindByLoginId(loginId string) (*model.Account, error)
+	GetAccount(id uint) (*model.Account, error)
+	UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error)
+	DeleteAccount(id uint) (bool, error)
 }
 
 type accountService struct {
@@ -57,7 +57,19 @@ func (a *accountService) CreateAccount(createAccountDto *dto.CreateAccountDto) (
 	return account, nil
 }
 
-func (a *accountService) UpdateAccountPassword(loginId string, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error) {
+func (a *accountService) GetAccount(id uint) (*model.Account, error) {
+	repo := a.container.GetRepository()
+
+	account := model.Account{}
+	tx := repo.First(&account, id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &account, nil
+}
+
+func (a *accountService) UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error) {
 	// password validation
 	if len(UpdatePasswordDto.Password) < 8 {
 		a.container.GetLogger().GetZapLogger().Errorf("password must be at least 8 characters")
@@ -68,14 +80,13 @@ func (a *accountService) UpdateAccountPassword(loginId string, UpdatePasswordDto
 		return false, nil
 	}
 
-	return a.updatePassword(loginId, UpdatePasswordDto.Password)
+	return a.updatePassword(id, UpdatePasswordDto.Password)
 }
 
-func (a *accountService) DeleteAccount(loginId string) (bool, error) {
+func (a *accountService) DeleteAccount(id uint) (bool, error) {
 	repo := a.container.GetRepository()
-	account := model.Account{LoginId:loginId}
 
-	if err:=repo.Delete(&account).Error; err != nil {
+	if err := repo.Delete(&model.Account{}, id).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -92,6 +103,7 @@ func (a *accountService) existsByLoginId(loginId string) (bool, error) {
 
 	return exists, tx.Error
 }
+
 
 func (a *accountService) FindByLoginId(loginId string) (*model.Account, error) {
 	repo := a.container.GetRepository()
@@ -114,11 +126,12 @@ func (a *accountService) create(account *model.Account) (error) {
 	return nil
 }
 
-func (a *accountService) updatePassword(loginId string, password string) (bool, error) {
+func (a *accountService) updatePassword(id uint, password string) (bool, error) {
 	repo := a.container.GetRepository()
 
-	account := model.Account{LoginId:loginId}
-	tx := repo.Model(account).Update("password", password)
+	account := model.Account{}
+	account.ID = id
+	tx := repo.Model(&account).Update("password", password)
 	if tx.Error != nil {
 		return false, tx.Error
 	}

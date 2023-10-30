@@ -34,6 +34,7 @@ const (
 	// APIAccount represents the group of account management API.
 	APIAccount = API + "/account"
 	APIAccountIdParam = "id"
+	APIAccountLoginIdParam = "loginid"
 	APIAccountIdPath = APIAccount + "/:" + APIAccountIdParam
 )
 

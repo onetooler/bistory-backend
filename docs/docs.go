@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accounts": {
+        "/account": {
             "post": {
                 "description": "Create a new account",
                 "consumes": [
@@ -29,7 +29,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Accounts"
+                    "Account"
                 ],
                 "summary": "Create a new account",
                 "parameters": [
@@ -65,7 +65,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/accounts/{account_id}": {
+        "/account/{account_id}": {
             "get": {
                 "description": "Get a account",
                 "consumes": [
@@ -75,7 +75,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Accounts"
+                    "Account"
                 ],
                 "summary": "Get a account",
                 "parameters": [
@@ -117,7 +117,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Accounts"
+                    "Account"
                 ],
                 "summary": "Update the existing account",
                 "parameters": [
@@ -168,7 +168,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Accounts"
+                    "Account"
                 ],
                 "summary": "Delete the existing account",
                 "parameters": [

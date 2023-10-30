@@ -24,7 +24,7 @@ type Repository interface {
 	Create(value interface{}) *gorm.DB
 	Save(value interface{}) *gorm.DB
 	Updates(value interface{}) *gorm.DB
-	Delete(value interface{}) *gorm.DB
+	Delete(value interface{}, where ...interface{}) *gorm.DB
 	Where(query interface{}, args ...interface{}) *gorm.DB
 	Preload(column string, conditions ...interface{}) *gorm.DB
 	Scopes(funcs ...func(*gorm.DB) *gorm.DB) *gorm.DB
@@ -40,10 +40,6 @@ type repository struct {
 	db *gorm.DB
 }
 
-type repositoryImpl struct {
-	*repository
-}
-
 func NewRepository(logger logger.Logger, conf *config.Config) Repository {
 	logger.GetZapLogger().Infof("Try database connection")
 	db, err := connectDatabase(logger, conf)
@@ -52,7 +48,7 @@ func NewRepository(logger logger.Logger, conf *config.Config) Repository {
 		os.Exit(config.ErrExitStatus)
 	}
 	logger.GetZapLogger().Infof("Success database connection, %s:%s", conf.Database.Host, conf.Database.Port)
-	return &repositoryImpl{&repository{db: db}}
+	return &repository{db: db}
 }
 
 const (
@@ -124,8 +120,8 @@ func (rep *repository) Updates(value interface{}) *gorm.DB {
 }
 
 // Delete delete value match given conditions.
-func (rep *repository) Delete(value interface{}) *gorm.DB {
-	return rep.db.Delete(value)
+func (rep *repository) Delete(value interface{}, where ...interface{}) *gorm.DB {
+	return rep.db.Delete(value, where...)
 }
 
 // Where returns a new relation.

@@ -69,7 +69,7 @@ func TestLogin_AuthenticationFailure(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
-	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	assert.Equal(t, http.StatusForbidden, rec.Code)
 	assert.Empty(t, test.GetCookie(rec, "GSESSION"))
 }
 

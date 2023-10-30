@@ -25,6 +25,7 @@ security:
   auth_path:
     - /api/.*
   exclude_path:
+    - /api/account/
     - /api/auth/login$
     - /api/auth/logout$
     - /api/health$

@@ -38,6 +38,13 @@ func (Account) TableName() string {
 	return "account"
 }
 
+func (a Account) CheckPassword(plainPassword string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(plainPassword)); err != nil {
+		return false
+	}
+	return true
+}
+
 // NewAccountWithPasswordEncrypt is constructor. And it is encoded password by using bcrypt.
 func NewAccountWithPasswordEncrypt(loginId, email, plainPassword string, authority Authority) (*Account, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(plainPassword), config.PasswordHashCost)

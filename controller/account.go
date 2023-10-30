@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/service"
+	"github.com/onetooler/bistory-backend/util"
 )
 
 // AccountController is a controller for managing accounts.
@@ -30,16 +33,24 @@ func NewAccountController(container container.Container) AccountController {
 // GetAccount returns one record matched account's id.
 // @Summary Get a account
 // @Description Get a account
-// @Tags Accounts
+// @Tags Account
 // @Accept  json
 // @Produce  json
 // @Param account_id path int true "Account ID"
 // @Success 200 {object} model.Account "Success to fetch data."
 // @Failure 400 {string} message "Failed to fetch data."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /accounts/{account_id} [get]
+// @Router /account/{account_id} [get]
 func (controller *accountController) GetAccount(c echo.Context) error {
-	account, err := controller.service.FindByLoginId(c.Param("id"))
+	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
+	if accountId == 0 {
+		return c.String(http.StatusBadRequest, "failed to parse id")
+	}
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+		return c.JSON(http.StatusForbidden, false)
+	}
+
+	account, err := controller.service.GetAccount(uint(accountId))
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
@@ -49,19 +60,21 @@ func (controller *accountController) GetAccount(c echo.Context) error {
 // CreateAccount create a new account by http post.
 // @Summary Create a new account
 // @Description Create a new account
-// @Tags Accounts
+// @Tags Account
 // @Accept  json
 // @Produce  json
 // @Param data body dto.CreateAccountDto true "a new account data for creating"
 // @Success 200 {object} model.Account "Success to create a new account."
 // @Failure 400 {string} message "Failed to the registration."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /accounts [post]
+// @Router /account [post]
 func (controller *accountController) CreateAccount(c echo.Context) error {
+	if controller.container.GetSession().GetAccount() != nil {
+		return c.String(http.StatusBadRequest, "this account is already logged in")
+	}
 	dto := dto.NewCreateAccountDto()
 	if err := c.Bind(dto); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
-
 	}
 	account, err := controller.service.CreateAccount(dto)
 	if err != nil {
@@ -73,7 +86,7 @@ func (controller *accountController) CreateAccount(c echo.Context) error {
 // UpdateAccount update the existing account by http put.
 // @Summary Update the existing account
 // @Description Update the existing account
-// @Tags Accounts
+// @Tags Account
 // @Accept  json
 // @Produce  json
 // @Param account_id path int true "Account ID"
@@ -81,13 +94,21 @@ func (controller *accountController) CreateAccount(c echo.Context) error {
 // @Success 200 {object} model.Account "Success to update the existing account."
 // @Failure 400 {string} message "Failed to the update."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /accounts/{account_id} [put]
+// @Router /account/{account_id} [put]
 func (controller *accountController) UpdateAccount(c echo.Context) error {
+	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
+	if accountId == 0 {
+		return c.String(http.StatusBadRequest, "failed to parse id")
+	}
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+		return c.JSON(http.StatusForbidden, false)
+	}
+
 	dto := dto.NewUpdatePasswordDto()
 	if err := c.Bind(dto); err != nil {
 		return c.JSON(http.StatusBadRequest, dto)
 	}
-	account, result := controller.service.UpdateAccountPassword(c.Param("id"), dto)
+	account, result := controller.service.UpdateAccountPassword(accountId, dto)
 	if result != nil {
 		return c.JSON(http.StatusBadRequest, result)
 	}
@@ -97,16 +118,24 @@ func (controller *accountController) UpdateAccount(c echo.Context) error {
 // DeleteAccount deletes the existing account by http delete.
 // @Summary Delete the existing account
 // @Description Delete the existing account
-// @Tags Accounts
+// @Tags Account
 // @Accept  json
 // @Produce  json
 // @Param account_id path int true "Account ID"
 // @Success 200 {object} model.Account "Success to delete the existing account."
 // @Failure 400 {string} message "Failed to the delete."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
-// @Router /accounts/{account_id} [delete]
+// @Router /account/{account_id} [delete]
 func (controller *accountController) DeleteAccount(c echo.Context) error {
-	account, result := controller.service.DeleteAccount(c.Param("id"))
+	accountId := util.ConvertToUint(c.Param(config.APIAccountIdParam))
+	if accountId == 0 {
+		return c.String(http.StatusBadRequest, "failed to parse id")
+	}
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+		return c.JSON(http.StatusForbidden, false)
+	}
+
+	account, result := controller.service.DeleteAccount(accountId)
 	if result != nil {
 		return c.JSON(http.StatusBadRequest, result)
 	}

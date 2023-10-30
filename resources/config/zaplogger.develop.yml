@@ -1,4 +1,4 @@
-zap_config: 
+zap_config:
   level: "debug"
   encoding: "console"
   development: true

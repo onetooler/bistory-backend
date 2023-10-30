@@ -14,7 +14,7 @@ import (
 
 func TestLogging(t *testing.T) {
 	router, container, logs := test.PrepareForLoggerTest()
-	
+
 	health := NewHealthController(container)
 	router.GET(config.APIHealth, func(c echo.Context) error { return health.GetHealthCheck(c) })
 

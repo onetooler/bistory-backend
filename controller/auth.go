@@ -84,8 +84,8 @@ func (controller *authController) Login(c echo.Context) error {
 	if !authorized {
 		return c.JSON(http.StatusForbidden, false)
 	}
-	sess.SetAccount(a)
-	sess.Save()
+	_ = sess.SetAccount(a)
+	_ = sess.Save()
 	return c.JSON(http.StatusOK, a)
 }
 

@@ -14,8 +14,8 @@ func TestAccountCreate_Success(t *testing.T) {
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
-		LoginId : "newTest",
-		Email   : "newTest@example.com",
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
 	account, err := service.CreateAccount(&createDto)
@@ -26,7 +26,7 @@ func TestAccountCreate_Success(t *testing.T) {
 	assert.NotEmpty(t, account.CreatedAt)
 	assert.NotEmpty(t, account.UpdatedAt)
 	assert.Empty(t, account.DeletedAt)
-	assert.Equal(t, model.AuthorityUser,account.Authority)
+	assert.Equal(t, model.AuthorityUser, account.Authority)
 
 	// equal check
 	assert.Equal(t, createDto.LoginId, account.LoginId)
@@ -39,8 +39,8 @@ func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
-		LoginId : "newTest",
-		Email   : "newTest@example.com",
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
 		Password: "newTest",
 	}
 	account, err := service.CreateAccount(&createDto)
@@ -53,8 +53,8 @@ func TestAccountGet_Success(t *testing.T) {
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
-		LoginId : "newTest",
-		Email   : "newTest@example.com",
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
 	savedAccount, _ := service.CreateAccount(&createDto)
@@ -75,7 +75,6 @@ func TestAccountGet_FailureNotExistsId(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, account)
 }
-
 
 // func TestAuthenticateByLoginIdAndPassword_EntityNotFound(t *testing.T) {
 // 	container := test.PrepareForServiceTest()

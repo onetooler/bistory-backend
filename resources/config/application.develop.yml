@@ -2,9 +2,9 @@ database:
   dialect: sqlite3
   host:  develop.db
   port:
-  dbname: 
-  loginId: 
-  password: 
+  dbname:
+  loginId:
+  password:
   migration: true
 
 extension:

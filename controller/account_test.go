@@ -20,21 +20,24 @@ import (
 )
 
 type mockService struct {
-	createAccount func(*dto.CreateAccountDto) (*model.Account, error)
+	createAccount         func(*dto.CreateAccountDto) (*model.Account, error)
 	updateAccountPassword func(uint, *dto.UpdatePasswordDto) (bool, error)
-	deleteAccount func(uint) (bool, error)
-	getAccount func(uint) (*model.Account, error)
+	deleteAccount         func(uint) (bool, error)
+	getAccount            func(uint) (*model.Account, error)
 }
 
 func (m *mockService) CreateAccount(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
 	return m.createAccount(createAccountDto)
 }
+
 func (m *mockService) UpdateAccountPassword(id uint, UpdatePasswordDto *dto.UpdatePasswordDto) (bool, error) {
 	return m.updateAccountPassword(id, UpdatePasswordDto)
 }
+
 func (m *mockService) DeleteAccount(id uint) (bool, error) {
 	return m.deleteAccount(id)
 }
+
 func (m *mockService) GetAccount(id uint) (*model.Account, error) {
 	return m.getAccount(id)
 }
@@ -48,14 +51,14 @@ func TestCreateAccount_Success(t *testing.T) {
 			createAccount: func(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
 				return &model.Account{
 					Model: gorm.Model{
-						ID: 2,
+						ID:        2,
 						CreatedAt: time.Now(),
 						UpdatedAt: time.Now(),
 					},
-   					LoginId  : createAccountDto.LoginId,
-   					Email    : createAccountDto.Email,
-   					Password : "hashed" + createAccountDto.Password,
-   					Authority: model.AuthorityUser,
+					LoginId:   createAccountDto.LoginId,
+					Email:     createAccountDto.Email,
+					Password:  "hashed" + createAccountDto.Password,
+					Authority: model.AuthorityUser,
 				}, nil
 			},
 		},
@@ -63,8 +66,8 @@ func TestCreateAccount_Success(t *testing.T) {
 	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
 
 	dto := dto.CreateAccountDto{
-		LoginId : "newTest", 
-		Email   : "newTest@example.com", 
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
 	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
@@ -73,7 +76,7 @@ func TestCreateAccount_Success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	
+
 	body := model.Account{}
 	err := json.Unmarshal(rec.Body.Bytes(), &body)
 	assert.Nil(t, err)
@@ -100,8 +103,8 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
 
 	dto := dto.CreateAccountDto{
-		LoginId : "newTest", 
-		Email   : "newTest@example.com", 
+		LoginId:  "newTest",
+		Email:    "newTest@example.com",
 		Password: "newTest",
 	}
 	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
@@ -126,8 +129,8 @@ func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
 	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
 
 	dto := dto.CreateAccountDto{
-		LoginId : "test", 
-		Email   : "newTest@example.com", 
+		LoginId:  "test",
+		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
 	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
@@ -152,8 +155,8 @@ func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
 	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
 
 	dto := dto.CreateAccountDto{
-		LoginId : "newTest", 
-		Email   : "test@example.com", 
+		LoginId:  "newTest",
+		Email:    "test@example.com",
 		Password: "newTestTest",
 	}
 	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
@@ -177,8 +180,8 @@ func TestGetAccount_Success(t *testing.T) {
 		},
 	}
 	router.GET(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)		
-		return account.GetAccount(c) 
+		login(container, testAccount)
+		return account.GetAccount(c)
 	})
 
 	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
@@ -187,7 +190,7 @@ func TestGetAccount_Success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	
+
 	body := model.Account{}
 	err := json.Unmarshal(rec.Body.Bytes(), &body)
 	assert.Nil(t, err)
@@ -213,7 +216,7 @@ func TestGetAccount_NoLoginFailure(t *testing.T) {
 		},
 	}
 	router.GET(config.APIAccountIdPath, func(c echo.Context) error {
-		return account.GetAccount(c) 
+		return account.GetAccount(c)
 	})
 
 	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
@@ -240,11 +243,11 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 		},
 	}
 	router.GET(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)		
-		return account.GetAccount(c) 
+		login(container, testAccount)
+		return account.GetAccount(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID + 1), nil)
+	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID+1), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -256,19 +259,19 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 }
 
 func login(container container.Container, account model.Account) {
-	container.GetSession().SetAccount(&account)
-	container.GetSession().Save()
+	_ = container.GetSession().SetAccount(&account)
+	_ = container.GetSession().Save()
 }
 
 func newTestUserAccount() model.Account {
 	return model.Account{
 		Model: gorm.Model{
-			ID: 2,
+			ID:        2,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
-		   LoginId  : "newTest",
-		   Email    : "newTest" + "@example.com",
-		   Authority: model.AuthorityUser,
+		LoginId:   "newTest",
+		Email:     "newTest" + "@example.com",
+		Authority: model.AuthorityUser,
 	}
 }

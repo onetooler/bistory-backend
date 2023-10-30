@@ -10,7 +10,7 @@ import (
 )
 
 func build(cfg *Config) (*zap.Logger, error) {
-	var zapCfg = cfg.ZapConfig
+	zapCfg := cfg.ZapConfig
 	enc, _ := newEncoder(zapCfg)
 	writer, errWriter := openWriters(cfg)
 

@@ -20,7 +20,7 @@ func NewAuthService(container container.Container) AuthService {
 }
 
 // AuthenticateByLoginIdAndPassword authenticates by using loginId and plain text password.
-func (a *authService) AuthenticateByLoginIdAndPassword(loginId string,  password string) (bool, *model.Account) {
+func (a *authService) AuthenticateByLoginIdAndPassword(loginId string, password string) (bool, *model.Account) {
 	account, err := a.findByLoginId(loginId)
 	if err != nil {
 		a.container.GetLogger().GetZapLogger().Errorf(err.Error())
@@ -38,7 +38,7 @@ func (a *authService) AuthenticateByLoginIdAndPassword(loginId string,  password
 func (a *authService) findByLoginId(loginId string) (*model.Account, error) {
 	repo := a.container.GetRepository()
 
-	account := model.Account{LoginId:loginId}
+	account := model.Account{LoginId: loginId}
 	tx := repo.First(&account)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -46,4 +46,3 @@ func (a *authService) findByLoginId(loginId string) (*model.Account, error) {
 
 	return &account, nil
 }
-

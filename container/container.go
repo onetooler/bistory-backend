@@ -29,9 +29,12 @@ type container struct {
 
 // NewContainer is constructor.
 func NewContainer(rep repository.Repository, s session.Session, config *config.Config,
-	messages map[string]string, logger logger.Logger, env string) Container {
-	return &container{rep: rep, session: s, config: config,
-		messages: messages, logger: logger, env: env}
+	messages map[string]string, logger logger.Logger, env string,
+) Container {
+	return &container{
+		rep: rep, session: s, config: config,
+		messages: messages, logger: logger, env: env,
+	}
 }
 
 // GetRepository returns the object of repository.

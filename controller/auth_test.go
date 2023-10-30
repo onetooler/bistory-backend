@@ -90,16 +90,16 @@ func TestLogout_Success(t *testing.T) {
 
 func createLoginSuccessAccount() *dto.LoginDto {
 	return &dto.LoginDto{
-		LoginId: "test",
-		Email: "test@example.com",
+		LoginId:  "test",
+		Email:    "test@example.com",
 		Password: "test",
 	}
 }
 
 func createLoginFailureAccount() *dto.LoginDto {
 	return &dto.LoginDto{
-		LoginId: "test",
-		Email: "test@example.com",
+		LoginId:  "test",
+		Email:    "test@example.com",
 		Password: "abcde",
 	}
 }

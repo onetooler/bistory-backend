@@ -9,10 +9,10 @@ import (
 // Account defines struct of account data.
 type Account struct {
 	gorm.Model
-	LoginId     string     `gorm:"unique;not null" json:"login_id"`
-	Email 		string     `gorm:"unique;not null" json:"email"`
-	Password    string     `json:"-"`
-	Authority 	Authority  `json:"authority"`
+	LoginId   string    `gorm:"unique;not null" json:"login_id"`
+	Email     string    `gorm:"unique;not null" json:"email"`
+	Password  string    `json:"-"`
+	Authority Authority `json:"authority"`
 }
 
 type Authority uint
@@ -23,14 +23,14 @@ const (
 )
 
 func (a Authority) String() string {
-    switch a {
-    case AuthorityAdmin:
-        return "Admin"
-    case AuthorityUser:
-        return "User"
-    default:
-        return "Invalid Authority"
-    }
+	switch a {
+	case AuthorityAdmin:
+		return "Admin"
+	case AuthorityUser:
+		return "User"
+	default:
+		return "Invalid Authority"
+	}
 }
 
 // TableName returns the table name of account struct and it is used by gorm.

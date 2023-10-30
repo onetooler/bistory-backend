@@ -53,7 +53,7 @@ func (a *accountService) CreateAccount(createAccountDto *dto.CreateAccountDto) (
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return account, nil
 }
 
@@ -104,11 +104,10 @@ func (a *accountService) existsByLoginId(loginId string) (bool, error) {
 	return exists, tx.Error
 }
 
-
 func (a *accountService) FindByLoginId(loginId string) (*model.Account, error) {
 	repo := a.container.GetRepository()
 
-	account := model.Account{LoginId:loginId}
+	account := model.Account{LoginId: loginId}
 	tx := repo.First(&account)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -117,7 +116,7 @@ func (a *accountService) FindByLoginId(loginId string) (*model.Account, error) {
 	return &account, nil
 }
 
-func (a *accountService) create(account *model.Account) (error) {
+func (a *accountService) create(account *model.Account) error {
 	repo := a.container.GetRepository()
 
 	if err := repo.Create(account).Error; err != nil {
@@ -138,4 +137,3 @@ func (a *accountService) updatePassword(id uint, password string) (bool, error) 
 
 	return true, nil
 }
-

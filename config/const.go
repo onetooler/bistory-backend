@@ -23,19 +23,19 @@ const (
 const (
 	// APIAuth represents the group of auth management API.
 	// APIAuth is a part of account but separate API for concentrate scope
-	APIAuth = API + "/auth"
-	APIAuthLoginStatus = APIAuth + "/loginStatus"
+	APIAuth             = API + "/auth"
+	APIAuthLoginStatus  = APIAuth + "/loginStatus"
 	APIAuthLoginAccount = APIAuth + "/loginAccount"
-	APIAuthLogin = APIAuth + "/login"
-	APIAuthLogout = APIAuth + "/logout"
+	APIAuthLogin        = APIAuth + "/login"
+	APIAuthLogout       = APIAuth + "/logout"
 )
 
 const (
 	// APIAccount represents the group of account management API.
-	APIAccount = API + "/account"
-	APIAccountIdParam = "id"
+	APIAccount             = API + "/account"
+	APIAccountIdParam      = "id"
 	APIAccountLoginIdParam = "loginid"
-	APIAccountIdPath = APIAccount + "/:" + APIAccountIdParam
+	APIAccountIdPath       = APIAccount + "/:" + APIAccountIdParam
 )
 
 const (

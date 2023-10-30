@@ -1,4 +1,4 @@
-zap_config: 
+zap_config:
   level: "info"
   encoding: "console"
   development: true

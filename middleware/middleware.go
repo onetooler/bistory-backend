@@ -19,7 +19,7 @@ import (
 	"gopkg.in/boj/redistore.v1"
 )
 
-var authorizationPathRegexps map [string]*regexp.Regexp
+var authorizationPathRegexps map[string]*regexp.Regexp
 
 // InitLoggerMiddleware initialize a middleware for logger.
 func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
@@ -35,7 +35,7 @@ func InitSessionMiddleware(e *echo.Echo, container container.Container) {
 
 	e.Use(SessionMiddleware(container))
 
-	if !conf.Extension.SecurityEnabled{
+	if !conf.Extension.SecurityEnabled {
 		return
 	}
 	e.Use(AuthenticationMiddleware(container))
@@ -120,8 +120,7 @@ func BodyLoggerMiddleware(container container.Container) echo.MiddlewareFunc {
 				logger.GetZapLogger().Debugf("%s request body: %s", c.Path(), reqBody)
 				logger.GetZapLogger().Debugf("%s response body: %s", c.Path(), resBody)
 			},
-		
-		},	
+		},
 	)
 }
 
@@ -175,7 +174,7 @@ func AuthenticationMiddleware(container container.Container) echo.MiddlewareFunc
 	for _, path := range container.GetConfig().Security.UserPath {
 		authorizationPathRegexps[path] = regexp.MustCompile(path)
 	}
-	
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if !hasAuthorization(c, container) {

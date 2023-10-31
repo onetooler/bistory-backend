@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/onetooler/bistory-backend/model"
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthenticateByLoginIdAndPassword_Success(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 
 	service := NewAuthService(container)
 	result, account := service.AuthenticateByLoginIdAndPassword("test", "test")
@@ -22,7 +22,7 @@ func TestAuthenticateByLoginIdAndPassword_Success(t *testing.T) {
 }
 
 func TestAuthenticateByLoginIdAndPassword_EntityNotFound(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 
 	service := NewAuthService(container)
 	result, account := service.AuthenticateByLoginIdAndPassword("abcde", "abcde")
@@ -32,7 +32,7 @@ func TestAuthenticateByLoginIdAndPassword_EntityNotFound(t *testing.T) {
 }
 
 func TestAuthenticateByLoginIdAndPassword_AuthenticationFailure(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 
 	service := NewAuthService(container)
 	result, account := service.AuthenticateByLoginIdAndPassword("test", "abcde")

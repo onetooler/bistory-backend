@@ -7,13 +7,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestLogging(t *testing.T) {
-	router, container, logs := test.PrepareForLoggerTest()
+	router, container, logs := testutil.PrepareForLoggerTest()
 
 	health := NewHealthController(container)
 	router.GET(config.APIHealth, func(c echo.Context) error { return health.GetHealthCheck(c) })

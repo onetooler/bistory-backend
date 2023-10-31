@@ -5,12 +5,12 @@ import (
 
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAccountCreate_Success(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
@@ -35,7 +35,7 @@ func TestAccountCreate_Success(t *testing.T) {
 }
 
 func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
@@ -49,7 +49,7 @@ func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
 }
 
 func TestAccountGet_Success(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
 
@@ -62,7 +62,7 @@ func TestAccountGet_Success(t *testing.T) {
 }
 
 func TestAccountGet_NotExistsIdFailure(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 	service := NewAccountService(container)
 
 	account, err := service.GetAccount(uint(999))
@@ -71,7 +71,7 @@ func TestAccountGet_NotExistsIdFailure(t *testing.T) {
 }
 
 func TestChangeAccountPassword_Success(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
@@ -87,7 +87,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 }
 
 func TestChangeAccountPassword_WrongPasswordFailure(t *testing.T) {
-	container := test.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest()
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)

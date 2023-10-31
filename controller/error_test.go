@@ -5,12 +5,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestJSONError(t *testing.T) {
-	router, container := test.PrepareForControllerTest(false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	errorHandler := NewErrorController(container)
 	router.HTTPErrorHandler = errorHandler.JSONError

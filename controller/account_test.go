@@ -15,7 +15,7 @@ import (
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
@@ -44,7 +44,7 @@ func (m *mockService) GetAccount(id uint) (*model.Account, error) {
 }
 
 func TestCreateAccount_Success(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	account := accountController{
 		container,
@@ -71,7 +71,7 @@ func TestCreateAccount_Success(t *testing.T) {
 		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
-	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -91,7 +91,7 @@ func TestCreateAccount_Success(t *testing.T) {
 }
 
 func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	account := accountController{
 		container,
@@ -108,7 +108,7 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 		Email:    "newTest@example.com",
 		Password: "newTest",
 	}
-	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -117,7 +117,7 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 }
 
 func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	account := accountController{
 		container,
@@ -134,7 +134,7 @@ func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
 		Email:    "newTest@example.com",
 		Password: "newTestTest",
 	}
-	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -143,7 +143,7 @@ func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
 }
 
 func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	account := accountController{
 		container,
@@ -160,7 +160,7 @@ func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
 		Email:    "test@example.com",
 		Password: "newTestTest",
 	}
-	req := test.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -169,7 +169,7 @@ func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
 }
 
 func TestGetAccount_Success(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -185,7 +185,7 @@ func TestGetAccount_Success(t *testing.T) {
 		return account.GetAccount(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
+	req := testutil.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -205,7 +205,7 @@ func TestGetAccount_Success(t *testing.T) {
 }
 
 func TestGetAccount_NoLoginFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -220,7 +220,7 @@ func TestGetAccount_NoLoginFailure(t *testing.T) {
 		return account.GetAccount(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
+	req := testutil.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -232,7 +232,7 @@ func TestGetAccount_NoLoginFailure(t *testing.T) {
 }
 
 func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -248,7 +248,7 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 		return account.GetAccount(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID+1), nil)
+	req := testutil.NewJSONRequest(http.MethodGet, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID+1), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -260,7 +260,7 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 }
 
 func TestChangeAccountPassword_Success(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -276,7 +276,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 		return account.ChangeAccountPassword(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
+	req := testutil.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
@@ -296,7 +296,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 }
 
 func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
-	router, container := test.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -311,7 +311,7 @@ func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
 		return account.ChangeAccountPassword(c)
 	})
 
-	req := test.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
+	req := testutil.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)

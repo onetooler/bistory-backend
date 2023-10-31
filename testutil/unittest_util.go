@@ -1,4 +1,4 @@
-package test
+package testutil
 
 import (
 	"encoding/json"
@@ -30,8 +30,7 @@ func PrepareForControllerTest(isSecurity bool) (*echo.Echo, container.Container)
 
 	middleware.InitLoggerMiddleware(e, container)
 
-	migration.CreateDatabase(container)
-	migration.InitMasterData(container)
+	migration.Init(container)
 
 	middleware.InitSessionMiddleware(e, container)
 	return e, container
@@ -43,8 +42,7 @@ func PrepareForServiceTest() container.Container {
 	logger := initTestLogger()
 	container := initContainer(conf, logger)
 
-	migration.CreateDatabase(container)
-	migration.InitMasterData(container)
+	migration.Init(container)
 
 	return container
 }
@@ -57,8 +55,7 @@ func PrepareForLoggerTest() (*echo.Echo, container.Container, *observer.Observed
 	logger, observedLogs := initObservedLogger()
 	container := initContainer(conf, logger)
 
-	migration.CreateDatabase(container)
-	migration.InitMasterData(container)
+	migration.Init(container)
 
 	middleware.InitSessionMiddleware(e, container)
 	middleware.InitLoggerMiddleware(e, container)

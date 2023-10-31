@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	_ "github.com/onetooler/bistory-backend/docs" // for using echo-swagger
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func TestSwagger(t *testing.T) {
-	router, _ := test.PrepareForControllerTest(false)
+	router, _ := testutil.PrepareForControllerTest(false)
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	req := httptest.NewRequest("GET", "/swagger/index.html", nil)

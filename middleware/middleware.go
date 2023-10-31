@@ -21,6 +21,36 @@ import (
 
 var authorizationPathRegexps map[string]*regexp.Regexp
 
+func Init(e *echo.Echo, container container.Container, staticFile embed.FS) {
+	InitCORSMiddleware(e, container)
+	InitLoggerMiddleware(e, container)
+	InitSessionMiddleware(e, container)
+	StaticContentsMiddleware(e, container, staticFile)
+}
+
+func InitCORSMiddleware(e *echo.Echo, container container.Container) {
+	if container.GetConfig().Extension.CorsEnabled {
+		e.Use(echomd.CORSWithConfig(echomd.CORSConfig{
+			AllowCredentials:                         true,
+			UnsafeWildcardOriginWithAllowCredentials: true,
+			AllowOrigins:                             []string{"*"},
+			AllowHeaders: []string{
+				echo.HeaderAccessControlAllowHeaders,
+				echo.HeaderContentType,
+				echo.HeaderContentLength,
+				echo.HeaderAcceptEncoding,
+			},
+			AllowMethods: []string{
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+			},
+			MaxAge: 86400,
+		}))
+	}
+}
+
 // InitLoggerMiddleware initialize a middleware for logger.
 func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
 	e.Use(RequestLoggerMiddleware(container))

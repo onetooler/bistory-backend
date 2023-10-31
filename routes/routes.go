@@ -1,8 +1,6 @@
-package router
+package routes
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/onetooler/bistory-backend/config"
@@ -15,37 +13,12 @@ import (
 
 // Init initialize the routing of this application.
 func Init(e *echo.Echo, container container.Container) {
-	setCORSConfig(e, container)
-
 	setErrorController(e, container)
 	setAuthController(e, container)
 	setAccountController(e, container)
 	setHealthController(e, container)
 
 	setSwagger(container, e)
-}
-
-func setCORSConfig(e *echo.Echo, container container.Container) {
-	if container.GetConfig().Extension.CorsEnabled {
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowCredentials:                         true,
-			UnsafeWildcardOriginWithAllowCredentials: true,
-			AllowOrigins:                             []string{"*"},
-			AllowHeaders: []string{
-				echo.HeaderAccessControlAllowHeaders,
-				echo.HeaderContentType,
-				echo.HeaderContentLength,
-				echo.HeaderAcceptEncoding,
-			},
-			AllowMethods: []string{
-				http.MethodGet,
-				http.MethodPost,
-				http.MethodPut,
-				http.MethodDelete,
-			},
-			MaxAge: 86400,
-		}))
-	}
 }
 
 func setErrorController(e *echo.Echo, container container.Container) {

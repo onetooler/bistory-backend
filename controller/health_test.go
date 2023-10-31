@@ -7,12 +7,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
-	"github.com/onetooler/bistory-backend/test"
+	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetHealthCheck(t *testing.T) {
-	router, container := test.PrepareForControllerTest(false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	health := NewHealthController(container)
 	router.GET(config.APIHealth, func(c echo.Context) error { return health.GetHealthCheck(c) })

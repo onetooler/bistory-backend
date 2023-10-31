@@ -21,7 +21,7 @@ func ReadPropertiesFile(fs embed.FS, fileName string) map[string]string {
 	if err != nil {
 		return nil
 	}
-	defer file.Close()
+	defer Check(file.Close)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

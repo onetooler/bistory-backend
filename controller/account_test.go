@@ -23,7 +23,7 @@ import (
 type mockService struct {
 	createAccount         func(*dto.CreateAccountDto) (*model.Account, error)
 	changeAccountPassword func(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
-	deleteAccount         func(uint) (bool, error)
+	deleteAccount         func(uint, *dto.DeleteAccountDto) error
 	getAccount            func(uint) (*model.Account, error)
 }
 
@@ -35,8 +35,8 @@ func (m *mockService) ChangeAccountPassword(id uint, UpdatePasswordDto *dto.Chan
 	return m.changeAccountPassword(id, UpdatePasswordDto)
 }
 
-func (m *mockService) DeleteAccount(id uint) (bool, error) {
-	return m.deleteAccount(id)
+func (m *mockService) DeleteAccount(id uint, dto *dto.DeleteAccountDto) error {
+	return m.deleteAccount(id, dto)
 }
 
 func (m *mockService) GetAccount(id uint) (*model.Account, error) {
@@ -312,6 +312,64 @@ func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
 	})
 
 	req := testutil.NewJSONRequest(http.MethodPost, strings.Replace(config.APIAccountChangePassword, ":"+config.APIAccountIdParam, strconv.Itoa(int(testAccount.ID)), 1), nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+
+	bodyBool, _ := strconv.ParseBool(rec.Body.String())
+	assert.False(t, bodyBool)
+}
+
+func TestDeleteAccount_Success(t *testing.T) {
+	router, container := testutil.PrepareForControllerTest(true)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			deleteAccount: func(accountId uint, dto *dto.DeleteAccountDto) error {
+				return nil
+			},
+		},
+	}
+	router.DELETE(config.APIAccountIdPath, func(c echo.Context) error {
+		login(container, testAccount)
+		return account.DeleteAccount(c)
+	})
+
+	dto := dto.DeleteAccountDto{
+		Password: testAccount.Password,
+	}
+	req := testutil.NewJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID), dto)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
+	router, container := testutil.PrepareForControllerTest(true)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			deleteAccount: func(accountId uint, dto *dto.DeleteAccountDto) error {
+				return nil
+			},
+		},
+	}
+	router.DELETE(config.APIAccountIdPath, func(c echo.Context) error {
+		login(container, testAccount)
+		return account.DeleteAccount(c)
+	})
+
+	dto := dto.DeleteAccountDto{
+		Password: testAccount.Password,
+	}
+	req := testutil.NewJSONRequest(http.MethodDelete, fmt.Sprintf("%s/%d", config.APIAccount, testAccount.ID+1), dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)

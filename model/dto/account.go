@@ -45,3 +45,11 @@ func (l *ChangeAccountPasswordDto) ToString() (string, error) {
 	bytes, err := json.Marshal(l)
 	return string(bytes), err
 }
+
+type DeleteAccountDto struct {
+	Password string `json:"password"`
+}
+
+func NewDeleteAccountDto() *DeleteAccountDto {
+	return &DeleteAccountDto{}
+}

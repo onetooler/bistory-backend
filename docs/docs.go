@@ -123,13 +123,22 @@ const docTemplate = `{
                         "name": "accountId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "the account password data for updating",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteAccountDto"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Success to delete the existing account.",
                         "schema": {
-                            "$ref": "#/definitions/model.Account"
+                            "type": "boolean"
                         }
                     },
                     "400": {
@@ -369,6 +378,14 @@ const docTemplate = `{
                 "loginId": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DeleteAccountDto": {
+            "type": "object",
+            "properties": {
                 "password": {
                     "type": "string"
                 }

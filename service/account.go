@@ -12,9 +12,9 @@ import (
 // AccountService is a service for managing user account.
 type AccountService interface {
 	CreateAccount(*dto.CreateAccountDto) (*model.Account, error)
-	GetAccount(id uint) (*model.Account, error)
+	GetAccount(uint) (*model.Account, error)
 	ChangeAccountPassword(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
-	DeleteAccount(id uint) (bool, error)
+	DeleteAccount(uint, *dto.DeleteAccountDto) error
 }
 
 type accountService struct {
@@ -86,13 +86,20 @@ func (a *accountService) ChangeAccountPassword(id uint, changeAccountPasswordDto
 	return a.updatePassword(id, changeAccountPasswordDto.NewPassword)
 }
 
-func (a *accountService) DeleteAccount(id uint) (bool, error) {
-	repo := a.container.GetRepository()
-
-	if err := repo.Delete(&model.Account{}, id).Error; err != nil {
-		return false, err
+func (a *accountService) DeleteAccount(id uint, deleteAccountDto *dto.DeleteAccountDto) error {
+	account, err := a.GetAccount(id)
+	if err != nil {
+		return err
 	}
-	return true, nil
+	ok := account.CheckPassword(deleteAccountDto.Password)
+	if !ok {
+		return fmt.Errorf("password is not valid")
+	}
+
+	if err := a.container.GetRepository().Delete(account).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 // TODO: Need to review whether to change to ORM style call.

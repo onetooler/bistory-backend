@@ -50,7 +50,7 @@ func (controller *accountController) GetAccount(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
-	account, err := controller.service.GetAccount(uint(accountId))
+	account, err := controller.service.GetAccount(accountId)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
@@ -124,7 +124,8 @@ func (controller *accountController) ChangeAccountPassword(c echo.Context) error
 // @Accept  json
 // @Produce  json
 // @Param accountId path int true "Account ID"
-// @Success 200 {object} model.Account "Success to delete the existing account."
+// @Param data body dto.DeleteAccountDto true "the account password data for updating"
+// @Success 200 {boolean} bool "Success to delete the existing account."
 // @Failure 400 {string} message "Failed to the delete."
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
 // @Router /account/{accountId} [delete]
@@ -137,9 +138,15 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
-	account, result := controller.service.DeleteAccount(accountId)
-	if result != nil {
-		return c.JSON(http.StatusBadRequest, result)
+	dto := dto.NewDeleteAccountDto()
+	if err := c.Bind(dto); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusOK, account)
+	err := controller.service.DeleteAccount(accountId, dto)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	_ = controller.container.GetSession().Logout()
+	return c.JSON(http.StatusOK, nil)
 }

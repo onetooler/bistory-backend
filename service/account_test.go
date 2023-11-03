@@ -101,6 +101,36 @@ func TestChangeAccountPassword_WrongPasswordFailure(t *testing.T) {
 	assert.Nil(t, account)
 }
 
+func TestDeleteAccount_Success(t *testing.T) {
+	container := testutil.PrepareForServiceTest()
+
+	service := NewAccountService(container)
+	savedAccount := createSuccessAccount(service)
+
+	dto := dto.DeleteAccountDto{
+		Password: "newTestTest",
+	}
+	err := service.DeleteAccount(savedAccount.ID, &dto)
+	assert.Nil(t, err)
+
+	account, err := service.GetAccount(savedAccount.ID)
+	assert.Nil(t, account)
+	assert.NotNil(t, err)
+}
+
+func TestDeleteAccount_WrongPasswordFailure(t *testing.T) {
+	container := testutil.PrepareForServiceTest()
+
+	service := NewAccountService(container)
+	savedAccount := createSuccessAccount(service)
+
+	dto := dto.DeleteAccountDto{
+		Password: "newTest",
+	}
+	err := service.DeleteAccount(savedAccount.ID, &dto)
+	assert.NotNil(t, err)
+}
+
 func createSuccessAccount(service AccountService) *model.Account {
 	createDto := dto.CreateAccountDto{
 		LoginId:  "newTest",

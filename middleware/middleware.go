@@ -232,11 +232,11 @@ func hasAuthorization(c echo.Context, container container.Container) bool {
 	if account == nil {
 		return false
 	}
-	if account.Authority == model.AuthorityAdmin && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
+	if account.Authority == uint(model.AuthorityAdmin) && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
 		_ = container.GetSession().Save()
 		return true
 	}
-	if account.Authority <= model.AuthorityUser && equalPath(currentPath, container.GetConfig().Security.UserPath) {
+	if account.Authority <= uint(model.AuthorityUser) && equalPath(currentPath, container.GetConfig().Security.UserPath) {
 		_ = container.GetSession().Save()
 		return true
 	}

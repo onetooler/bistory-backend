@@ -3,11 +3,11 @@ package session
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/sessions"
 	echoSession "github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/onetooler/bistory-backend/model"
 )
 
 // TODO: change gorilla/sessions to SCS for better performance
@@ -15,8 +15,8 @@ import (
 const (
 	// sessionStr represents a string of session key.
 	sessionStr = "GSESSION"
-	// Account is the key of account data in the session.
-	Account = "Account"
+	// accountStr is the key of account data in the session.
+	accountStr = "Account"
 )
 
 type session struct {
@@ -31,11 +31,18 @@ type Session interface {
 	Delete() error
 	SetValue(key string, value interface{}) error
 	GetValue(key string) string
-	SetAccount(account *model.Account) error
-	GetAccount() *model.Account
-	Login(account *model.Account) error
+	SetAccount(account *Account) error
+	GetAccount() *Account
+	Login(account *Account) error
 	Logout() error
-	HasAuthorizationTo(uint, model.Authority) bool
+	HasAuthorizationTo(uint, uint) bool
+}
+
+type Account struct {
+	Id        uint      `json:"id"`
+	LoginId   string    `json:"loginId"`
+	LoginTime time.Time `json:"loginTime"`
+	Authority uint      `json:"authority"`
 }
 
 // NewSession is constructor.
@@ -107,7 +114,8 @@ func (s *session) GetValue(key string) string {
 	return ""
 }
 
-func (s *session) Login(account *model.Account) error {
+func (s *session) Login(account *Account) error {
+	account.LoginTime = time.Now()
 	if err := s.SetAccount(account); err != nil {
 		return err
 	}
@@ -127,30 +135,28 @@ func (s *session) Logout() error {
 	return nil
 }
 
-// SetAccount sets account data in session.
-func (s *session) SetAccount(account *model.Account) error {
-	return s.SetValue(Account, account)
+func (s *session) SetAccount(account *Account) error {
+	return s.SetValue(accountStr, account)
 }
 
-// GetAccount returns account object of session.
-func (s *session) GetAccount() *model.Account {
-	if v := s.GetValue(Account); v != "" {
-		a := &model.Account{}
+func (s *session) GetAccount() *Account {
+	if v := s.GetValue(accountStr); v != "" {
+		a := &Account{}
 		_ = json.Unmarshal([]byte(v), a)
 		return a
 	}
 	return nil
 }
 
-func (s *session) HasAuthorizationTo(accountId uint, authorityLevel model.Authority) bool {
+func (s *session) HasAuthorizationTo(accountId uint, authority uint) bool {
 	currentAccount := s.GetAccount()
 	if currentAccount == nil {
 		return false
 	}
-	if currentAccount.ID == accountId {
+	if currentAccount.Id == accountId {
 		return true
 	}
-	if currentAccount.Authority < authorityLevel {
+	if currentAccount.Authority < authority {
 		return true
 	}
 	return false

@@ -46,7 +46,7 @@ func (controller *accountController) GetAccount(c echo.Context) error {
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -100,7 +100,7 @@ func (controller *accountController) ChangeAccountPassword(c echo.Context) error
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -134,7 +134,7 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, model.AuthorityUser) {
+	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -148,5 +148,6 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 	}
 
 	_ = controller.container.GetSession().Logout()
+
 	return c.JSON(http.StatusOK, nil)
 }

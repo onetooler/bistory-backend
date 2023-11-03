@@ -7,6 +7,7 @@ import (
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/service"
+	"github.com/onetooler/bistory-backend/session"
 )
 
 // AuthController is a controller for managing user account.
@@ -80,12 +81,18 @@ func (controller *authController) Login(c echo.Context) error {
 		return c.JSON(http.StatusOK, account)
 	}
 
-	authorized, a := controller.service.AuthenticateByLoginIdAndPassword(dto.LoginId, dto.Password)
+	authorized, account := controller.service.AuthenticateByLoginIdAndPassword(dto.LoginId, dto.Password)
 	if !authorized {
 		return c.JSON(http.StatusForbidden, false)
 	}
-	_ = sess.Login(a)
-	return c.JSON(http.StatusOK, a)
+	_ = sess.Login(
+		&session.Account{
+			Id:        account.ID,
+			LoginId:   account.LoginId,
+			Authority: uint(account.Authority),
+		},
+	)
+	return c.JSON(http.StatusOK, account)
 }
 
 // Logout is the method to logout by http post.

@@ -15,6 +15,7 @@ import (
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
+	"github.com/onetooler/bistory-backend/session"
 	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -380,8 +381,13 @@ func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
 }
 
 func login(container container.Container, account model.Account) {
-	_ = container.GetSession().SetAccount(&account)
-	_ = container.GetSession().Save()
+	_ = container.GetSession().Login(
+		&session.Account{
+			Id:        account.ID,
+			LoginId:   account.LoginId,
+			Authority: uint(account.Authority),
+		},
+	)
 }
 
 func newTestUserAccount() model.Account {

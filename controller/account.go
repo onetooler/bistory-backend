@@ -72,11 +72,11 @@ func (controller *accountController) CreateAccount(c echo.Context) error {
 	if controller.container.GetSession().GetAccount() != nil {
 		return c.String(http.StatusBadRequest, "this account is already logged in")
 	}
-	dto := dto.NewCreateAccountDto()
-	if err := c.Bind(dto); err != nil {
+	data := dto.NewCreateAccountDto()
+	if err := c.Bind(data); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	account, err := controller.service.CreateAccount(dto)
+	account, err := controller.service.CreateAccount(data)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
@@ -104,11 +104,11 @@ func (controller *accountController) ChangeAccountPassword(c echo.Context) error
 		return c.JSON(http.StatusForbidden, false)
 	}
 
-	dto := dto.NewChangeAccountPasswordDto()
-	if err := c.Bind(dto); err != nil {
+	data := dto.NewChangeAccountPasswordDto()
+	if err := c.Bind(data); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	account, err := controller.service.ChangeAccountPassword(accountId, dto)
+	account, err := controller.service.ChangeAccountPassword(accountId, data)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
@@ -138,11 +138,11 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
-	dto := dto.NewDeleteAccountDto()
-	if err := c.Bind(dto); err != nil {
+	data := dto.NewDeleteAccountDto()
+	if err := c.Bind(data); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	err := controller.service.DeleteAccount(accountId, dto)
+	err := controller.service.DeleteAccount(accountId, data)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

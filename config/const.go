@@ -4,12 +4,12 @@ package config
 const ErrExitStatus int = 2
 
 const (
-	// AppConfigPath is the path of application.yml.
-	AppConfigPath = "resources/config/application.%s.yml"
-	// MessagesConfigPath is the path of messages.properties.
+	EmailTemplatesPath  = "resources/email"
+	FindLoginIdTemplate = "find-login-id.html"
+
+	AppConfigPath      = "resources/config/application.%s.yml"
 	MessagesConfigPath = "resources/config/messages.properties"
-	// LoggerConfigPath is the path of zaplogger.yml.
-	LoggerConfigPath = "resources/config/zaplogger.%s.yml"
+	LoggerConfigPath   = "resources/config/zaplogger.%s.yml"
 )
 
 // PasswordHashCost is hash cost for a password.

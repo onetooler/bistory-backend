@@ -3,9 +3,11 @@ package service
 import (
 	"testing"
 
+	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/testutil"
+	"github.com/onetooler/bistory-backend/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -129,6 +131,24 @@ func TestDeleteAccount_WrongPasswordFailure(t *testing.T) {
 	}
 	err := service.DeleteAccount(savedAccount.ID, &dto)
 	assert.NotNil(t, err)
+}
+
+func TestFindAccountByEmail_Success(t *testing.T) {
+	mailServer := smtpmock.New(smtpmock.ConfigurationAttr{
+		LogToStdout:       true,
+		LogServerActivity: true,
+		PortNumber:        testutil.TestEmailServerPort,
+	})
+	err := mailServer.Start()
+	defer util.Check(mailServer.Stop)
+	assert.Nil(t, err)
+
+	container := testutil.PrepareForServiceTest()
+	service := NewAccountService(container)
+
+	savedAccount := createSuccessAccount(service)
+	err = service.FindAccountByEmail(savedAccount.Email)
+	assert.Nil(t, err)
 }
 
 func createSuccessAccount(service AccountService) *model.Account {

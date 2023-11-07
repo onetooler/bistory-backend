@@ -13,6 +13,9 @@ var zapYamlFile embed.FS
 //go:embed resources/public/*
 var staticFile embed.FS
 
+//go:embed resources/email/*
+var emailFile embed.FS
+
 //go:embed resources/config/messages.properties
 var propsFile embed.FS
 
@@ -26,6 +29,7 @@ func main() {
 		YamlFile:    yamlFile,
 		ZapYamlFile: zapYamlFile,
 		StaticFile:  staticFile,
+		EmailFile:   emailFile,
 		PropsFile:   propsFile,
 	}.Run()
 }

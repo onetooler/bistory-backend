@@ -7,6 +7,13 @@ database:
   password:
   migration: true
 
+email:
+  Account: 
+  Host: 
+  Port: 
+  Username: 
+  Password: 
+
 extension:
   master_generator: true
   cors_enabled: true

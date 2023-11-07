@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
@@ -15,6 +16,7 @@ type AccountService interface {
 	GetAccount(uint) (*model.Account, error)
 	ChangeAccountPassword(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	DeleteAccount(uint, *dto.DeleteAccountDto) error
+	FindAccountByEmail(string) error
 }
 
 type accountService struct {
@@ -102,6 +104,20 @@ func (a *accountService) DeleteAccount(id uint, deleteAccountDto *dto.DeleteAcco
 	return nil
 }
 
+func (a *accountService) FindAccountByEmail(loginId string) error {
+	repo := a.container.GetRepository()
+	emailSender := a.container.GetEmailSender()
+
+	account := model.Account{LoginId: loginId}
+	tx := repo.First(&account)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	// TODO: Change to Constant
+	subject := "[Bistory] 아이디 찾기 결과"
+	return emailSender.SendEmail(account.Email, subject, config.FindLoginIdTemplate, account.LoginId)
+}
+
 // TODO: Need to review whether to change to ORM style call.
 const existsAccount = "SELECT EXISTS (SELECT 1 FROM account WHERE id = ?);"
 
@@ -112,18 +128,6 @@ func (a *accountService) existsByLoginId(loginId string) (bool, error) {
 	tx := repo.Raw(existsAccount, loginId).Scan(&exists)
 
 	return exists, tx.Error
-}
-
-func (a *accountService) GetAccountByLoginId(loginId string) (*model.Account, error) {
-	repo := a.container.GetRepository()
-
-	account := model.Account{LoginId: loginId}
-	tx := repo.First(&account)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-
-	return &account, nil
 }
 
 func (a *accountService) create(account *model.Account) error {

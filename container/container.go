@@ -2,15 +2,15 @@ package container
 
 import (
 	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/infrastructure"
 	"github.com/onetooler/bistory-backend/logger"
-	"github.com/onetooler/bistory-backend/repository"
-	"github.com/onetooler/bistory-backend/session"
 )
 
 // Container represents a interface for accessing the data which sharing in overall application.
 type Container interface {
-	GetRepository() repository.Repository
-	GetSession() session.Session
+	GetRepository() infrastructure.Repository
+	GetSession() infrastructure.Session
+	GetEmailSender() infrastructure.EmailSender
 	GetConfig() *config.Config
 	GetMessages() map[string]string
 	GetLogger() logger.Logger
@@ -19,32 +19,48 @@ type Container interface {
 
 // container struct is for sharing data which such as database setting, the setting of application and logger in overall this application.
 type container struct {
-	rep      repository.Repository
-	session  session.Session
-	config   *config.Config
-	messages map[string]string
-	logger   logger.Logger
-	env      string
+	rep         infrastructure.Repository
+	session     infrastructure.Session
+	emailSender infrastructure.EmailSender
+	config      *config.Config
+	messages    map[string]string
+	logger      logger.Logger
+	env         string
 }
 
 // NewContainer is constructor.
-func NewContainer(rep repository.Repository, s session.Session, config *config.Config,
-	messages map[string]string, logger logger.Logger, env string,
+func NewContainer(
+	rep infrastructure.Repository,
+	session infrastructure.Session,
+	emailSender infrastructure.EmailSender,
+	config *config.Config,
+	messages map[string]string,
+	logger logger.Logger,
+	env string,
 ) Container {
 	return &container{
-		rep: rep, session: s, config: config,
-		messages: messages, logger: logger, env: env,
+		rep:         rep,
+		session:     session,
+		emailSender: emailSender,
+		config:      config,
+		messages:    messages,
+		logger:      logger,
+		env:         env,
 	}
 }
 
 // GetRepository returns the object of repository.
-func (c *container) GetRepository() repository.Repository {
+func (c *container) GetRepository() infrastructure.Repository {
 	return c.rep
 }
 
 // GetSession returns the object of session.
-func (c *container) GetSession() session.Session {
+func (c *container) GetSession() infrastructure.Session {
 	return c.session
+}
+
+func (c *container) GetEmailSender() infrastructure.EmailSender {
+	return c.emailSender
 }
 
 // GetConfig returns the object of configuration.

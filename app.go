@@ -6,12 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/infrastructure"
 	"github.com/onetooler/bistory-backend/logger"
 	"github.com/onetooler/bistory-backend/middleware"
 	"github.com/onetooler/bistory-backend/migration"
-	"github.com/onetooler/bistory-backend/repository"
 	"github.com/onetooler/bistory-backend/routes"
-	"github.com/onetooler/bistory-backend/session"
 	"github.com/onetooler/bistory-backend/util"
 )
 
@@ -19,6 +18,7 @@ type Server struct {
 	YamlFile    embed.FS
 	ZapYamlFile embed.FS
 	StaticFile  embed.FS
+	EmailFile   embed.FS
 	PropsFile   embed.FS
 }
 
@@ -32,11 +32,15 @@ func (s Server) Run() {
 	messages := config.LoadMessagesConfig(s.PropsFile)
 	logger.GetZapLogger().Infof("Loaded messages.properties")
 
-	rep := repository.NewRepository(logger, conf)
+	templates := config.LoadEmailTemplates(s.EmailFile)
+	logger.GetZapLogger().Infof("Loaded email templates.")
+
+	email := infrastructure.NewEmailSender(logger, conf, templates)
+	sess := infrastructure.NewSession()
+	rep := infrastructure.NewRepository(logger, conf)
 	defer util.Check(rep.Close)
 
-	sess := session.NewSession()
-	container := container.NewContainer(rep, sess, conf, messages, logger, env)
+	container := container.NewContainer(rep, sess, email, conf, messages, logger, env)
 
 	migration.Init(container)
 	routes.Init(e, container)

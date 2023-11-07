@@ -1,4 +1,4 @@
-package session
+package infrastructure
 
 import (
 	"encoding/json"

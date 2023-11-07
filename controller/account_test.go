@@ -13,9 +13,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/infrastructure"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/model/dto"
-	"github.com/onetooler/bistory-backend/session"
 	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -26,6 +26,7 @@ type mockService struct {
 	changeAccountPassword func(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	deleteAccount         func(uint, *dto.DeleteAccountDto) error
 	getAccount            func(uint) (*model.Account, error)
+	findAccountByEmail    func(string) error
 }
 
 func (m *mockService) CreateAccount(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
@@ -42,6 +43,10 @@ func (m *mockService) DeleteAccount(id uint, dto *dto.DeleteAccountDto) error {
 
 func (m *mockService) GetAccount(id uint) (*model.Account, error) {
 	return m.getAccount(id)
+}
+
+func (m *mockService) FindAccountByEmail(loginId string) error {
+	return m.findAccountByEmail(loginId)
 }
 
 func TestCreateAccount_Success(t *testing.T) {
@@ -382,7 +387,7 @@ func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
 
 func login(container container.Container, account model.Account) {
 	_ = container.GetSession().Login(
-		&session.Account{
+		&infrastructure.Account{
 			Id:        account.ID,
 			LoginId:   account.LoginId,
 			Authority: uint(account.Authority),

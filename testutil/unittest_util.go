@@ -3,6 +3,7 @@ package testutil
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -10,15 +11,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
+	"github.com/onetooler/bistory-backend/infrastructure"
 	"github.com/onetooler/bistory-backend/logger"
 	"github.com/onetooler/bistory-backend/middleware"
 	"github.com/onetooler/bistory-backend/migration"
-	"github.com/onetooler/bistory-backend/repository"
-	"github.com/onetooler/bistory-backend/session"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
+
+const TestEmailServerPort = 2525
 
 // PrepareForControllerTest func prepares the controllers for testing.
 func PrepareForControllerTest(isSecurity bool) (*echo.Echo, container.Container) {
@@ -67,6 +69,11 @@ func createConfig(isSecurity bool) *config.Config {
 	conf.Database.Dialect = "sqlite3"
 	conf.Database.Host = "file::memory:?cache=shared"
 	conf.Database.Migration = true
+	conf.Email.Account = "test@test.com"
+	conf.Email.Host = "localhost"
+	conf.Email.Port = TestEmailServerPort
+	conf.Email.Username = "username"
+	conf.Email.Password = "password"
 	conf.Extension.MasterGenerator = true
 	conf.Extension.SecurityEnabled = isSecurity
 	conf.Log.RequestLogFormat = "${remote_ip} ${account_loginid} ${uri} ${method} ${status}"
@@ -74,12 +81,19 @@ func createConfig(isSecurity bool) *config.Config {
 }
 
 func initContainer(conf *config.Config, logger logger.Logger) container.Container {
-	rep := repository.NewRepository(logger, conf)
-	sess := session.NewSession()
+	rep := infrastructure.NewRepository(logger, conf)
+	sess := infrastructure.NewSession()
+
+	t, _ := template.New(config.FindLoginIdTemplate).Parse("test hello {{.}}\n")
+	templates := map[string]*template.Template{
+		config.FindLoginIdTemplate: t,
+	}
+	emailSender := infrastructure.NewEmailSender(logger, conf, templates)
+
 	messages := map[string]string{
 		"TestErr": "It's a test message.",
 	}
-	container := container.NewContainer(rep, sess, conf, messages, logger, "test")
+	container := container.NewContainer(rep, sess, emailSender, conf, messages, logger, "test")
 	return container
 }
 

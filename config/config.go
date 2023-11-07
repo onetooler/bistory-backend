@@ -4,6 +4,8 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"html/template"
+	"io/fs"
 	"os"
 
 	"github.com/onetooler/bistory-backend/util"
@@ -26,6 +28,13 @@ type Config struct {
 		ConnectionPoolSize int  `yaml:"connection_pool_size" default:"10"`
 		Host               string
 		Port               string
+	}
+	Email struct {
+		Account  string
+		Host     string
+		Port     int
+		Username string
+		Password string
 	}
 	Extension struct {
 		MasterGenerator bool `yaml:"master_generator" default:"false"`
@@ -92,4 +101,30 @@ func LoadMessagesConfig(propsFile embed.FS) map[string]string {
 		os.Exit(ErrExitStatus)
 	}
 	return messages
+}
+
+func LoadEmailTemplates(emailFile embed.FS) map[string]*template.Template {
+	subfs, err := fs.Sub(emailFile, EmailTemplatesPath)
+	if err != nil {
+		fmt.Printf("Failed to load the email templates.")
+		os.Exit(ErrExitStatus)
+	}
+
+	files, err := util.GetAllFiles(subfs)
+	if err != nil {
+		fmt.Printf("Failed to load the email templates.")
+		os.Exit(ErrExitStatus)
+	}
+
+	templates := make(map[string]*template.Template)
+	for fileName, fileBody := range files {
+		t, err := template.New(fileName).Parse(fileBody)
+		if err != nil {
+			fmt.Printf("Failed to load the email templates.")
+			os.Exit(ErrExitStatus)
+		}
+		templates[fileName] = t
+	}
+
+	return templates
 }

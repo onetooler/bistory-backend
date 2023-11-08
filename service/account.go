@@ -16,7 +16,7 @@ type AccountService interface {
 	GetAccount(uint) (*model.Account, error)
 	ChangeAccountPassword(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	DeleteAccount(uint, *dto.DeleteAccountDto) error
-	FindAccountByEmail(string) error
+	FindAccountByEmail(*dto.FindLoginIdDto) error
 }
 
 type accountService struct {
@@ -104,12 +104,12 @@ func (a *accountService) DeleteAccount(id uint, deleteAccountDto *dto.DeleteAcco
 	return nil
 }
 
-func (a *accountService) FindAccountByEmail(email string) error {
+func (a *accountService) FindAccountByEmail(findLoginIdDto *dto.FindLoginIdDto) error {
 	repo := a.container.GetRepository()
 	emailSender := a.container.GetEmailSender()
 
-	account := model.Account{Email: email}
-	tx := repo.Where(&account).First(&account)
+	account := model.Account{Email: findLoginIdDto.Email}
+	tx := repo.Where(&account).Take(&account)
 	if tx.Error != nil {
 		return tx.Error
 	}

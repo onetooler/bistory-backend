@@ -145,9 +145,12 @@ func TestFindAccountByEmail_Success(t *testing.T) {
 
 	container := testutil.PrepareForServiceTest(true)
 	service := NewAccountService(container)
-
 	savedAccount := createSuccessAccount(service)
-	err = service.FindAccountByEmail(savedAccount.Email)
+
+	dto := dto.FindLoginIdDto{
+		Email: savedAccount.Email,
+	}
+	err = service.FindAccountByEmail(&dto)
 	assert.Nil(t, err)
 }
 
@@ -164,9 +167,12 @@ func TestFindAccountByEmail_NoExistMailFailure(t *testing.T) {
 
 	container := testutil.PrepareForServiceTest(true)
 	service := NewAccountService(container)
-
 	savedAccount := createSuccessAccount(service)
-	err = service.FindAccountByEmail(savedAccount.Email)
+
+	dto := dto.FindLoginIdDto{
+		Email: savedAccount.Email,
+	}
+	err = service.FindAccountByEmail(&dto)
 	assert.NotNil(t, err)
 }
 

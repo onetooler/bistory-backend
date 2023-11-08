@@ -61,6 +61,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/account/find-login-id": {
+            "post": {
+                "description": "Find LoginId By Email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Find LoginId By Email",
+                "parameters": [
+                    {
+                        "description": "Account Email",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.FindLoginIdDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success to send email.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed to send email.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Failed to the authentication. Returns false.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "/account/{accountId}": {
             "get": {
                 "description": "Get a account",
@@ -387,6 +433,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.FindLoginIdDto": {
+            "type": "object",
+            "properties": {
+                "email": {
                     "type": "string"
                 }
             }

@@ -44,6 +44,7 @@ func setAccountController(e *echo.Echo, container container.Container) {
 	e.GET(config.APIAccountIdPath, func(c echo.Context) error { return account.GetAccount(c) })
 	e.POST(config.APIAccountChangePassword, func(c echo.Context) error { return account.ChangeAccountPassword(c) })
 	e.DELETE(config.APIAccountIdPath, func(c echo.Context) error { return account.DeleteAccount(c) })
+	e.POST(config.APIAccountFindLoginId, func(c echo.Context) error { return account.FindLoginId(c) })
 }
 
 func setHealthController(e *echo.Echo, container container.Container) {

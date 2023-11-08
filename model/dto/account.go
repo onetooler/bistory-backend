@@ -53,3 +53,11 @@ type DeleteAccountDto struct {
 func NewDeleteAccountDto() *DeleteAccountDto {
 	return &DeleteAccountDto{}
 }
+
+type FindLoginIdDto struct {
+	Email string `json:"email"`
+}
+
+func NewFindLoginIdDto() *FindLoginIdDto {
+	return &FindLoginIdDto{}
+}

@@ -26,7 +26,7 @@ type mockService struct {
 	changeAccountPassword func(uint, *dto.ChangeAccountPasswordDto) (*model.Account, error)
 	deleteAccount         func(uint, *dto.DeleteAccountDto) error
 	getAccount            func(uint) (*model.Account, error)
-	findAccountByEmail    func(string) error
+	findAccountByEmail    func(*dto.FindLoginIdDto) error
 }
 
 func (m *mockService) CreateAccount(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
@@ -45,8 +45,8 @@ func (m *mockService) GetAccount(id uint) (*model.Account, error) {
 	return m.getAccount(id)
 }
 
-func (m *mockService) FindAccountByEmail(loginId string) error {
-	return m.findAccountByEmail(loginId)
+func (m *mockService) FindAccountByEmail(dto *dto.FindLoginIdDto) error {
+	return m.findAccountByEmail(dto)
 }
 
 func TestCreateAccount_Success(t *testing.T) {
@@ -383,6 +383,60 @@ func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
 
 	bodyBool, _ := strconv.ParseBool(rec.Body.String())
 	assert.False(t, bodyBool)
+}
+
+func TestFindLoginId_Success(t *testing.T) {
+	router, container := testutil.PrepareForControllerTest(true, false)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			findAccountByEmail: func(dto *dto.FindLoginIdDto) error {
+				return nil
+			},
+		},
+	}
+	router.POST(config.APIAccountFindLoginId, func(c echo.Context) error {
+		return account.FindLoginId(c)
+	})
+
+	dto := dto.FindLoginIdDto{
+		Email: testAccount.Email,
+	}
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccountFindLoginId, dto)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestFindLoginId_NoExistAccountFailure(t *testing.T) {
+	router, container := testutil.PrepareForControllerTest(true, false)
+
+	testAccount := newTestUserAccount()
+	account := accountController{
+		container,
+		&mockService{
+			findAccountByEmail: func(dto *dto.FindLoginIdDto) error {
+				return fmt.Errorf("account not found")
+			},
+		},
+	}
+	router.POST(config.APIAccountFindLoginId, func(c echo.Context) error {
+		return account.FindLoginId(c)
+	})
+
+	dto := dto.FindLoginIdDto{
+		Email: testAccount.Email,
+	}
+	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccountFindLoginId, dto)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
 func login(container container.Container, account model.Account) {

@@ -18,6 +18,7 @@ type AccountController interface {
 	CreateAccount(c echo.Context) error
 	ChangeAccountPassword(c echo.Context) error
 	DeleteAccount(c echo.Context) error
+	FindLoginId(c echo.Context) error
 }
 
 type accountController struct {
@@ -150,4 +151,32 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 	_ = controller.container.GetSession().Logout()
 
 	return c.JSON(http.StatusOK, nil)
+}
+
+// FindLoginId send email that contains account's login id to account's email address.
+// @Summary Find LoginId By Email
+// @Description Find LoginId By Email
+// @Tags Account
+// @Accept  json
+// @Produce  json
+// @Param email body dto.FindLoginIdDto true "Account Email"
+// @Success 200 {boolean} bool "Success to send email."
+// @Failure 400 {string} message "Failed to send email."
+// @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
+// @Router /account/find-login-id [post]
+func (controller *accountController) FindLoginId(c echo.Context) error {
+	if controller.container.GetSession().GetAccount() != nil {
+		return c.String(http.StatusBadRequest, "this account is already logged in")
+	}
+
+	data := dto.NewFindLoginIdDto()
+	if err := c.Bind(data); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	err := controller.service.FindAccountByEmail(data)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, true)
 }

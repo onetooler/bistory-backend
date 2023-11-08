@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
@@ -26,7 +27,21 @@ const TestEmailServerPort = 2525
 func PrepareForControllerTest(isSecurity, useEmail bool) (*echo.Echo, container.Container) {
 	e := echo.New()
 
-	conf := createConfig(isSecurity, useEmail)
+	conf := createBaseConfig(isSecurity)
+	if useEmail {
+		conf.Email.Enabled = true
+		conf.Email.Account = "test@test.com"
+		conf.Email.Host = "127.0.0.1"
+		conf.Email.Port = TestEmailServerPort
+		conf.Email.Username = "username"
+		conf.Email.Password = "password"
+	}
+	m := miniredis.NewMiniRedis()
+	m.Start()
+	conf.Redis.Enabled = true
+	conf.Redis.Host = m.Host()
+	conf.Redis.Port = m.Port()
+
 	logger := initTestLogger()
 	container := initContainer(conf, logger)
 
@@ -40,7 +55,16 @@ func PrepareForControllerTest(isSecurity, useEmail bool) (*echo.Echo, container.
 
 // PrepareForServiceTest func prepares the services for testing.
 func PrepareForServiceTest(useEmail bool) container.Container {
-	conf := createConfig(false, useEmail)
+	conf := createBaseConfig(false)
+	if useEmail {
+		conf.Email.Enabled = true
+		conf.Email.Account = "test@test.com"
+		conf.Email.Host = "127.0.0.1"
+		conf.Email.Port = TestEmailServerPort
+		conf.Email.Username = "username"
+		conf.Email.Password = "password"
+	}
+
 	logger := initTestLogger()
 	container := initContainer(conf, logger)
 
@@ -53,7 +77,7 @@ func PrepareForServiceTest(useEmail bool) container.Container {
 func PrepareForLoggerTest() (*echo.Echo, container.Container, *observer.ObservedLogs) {
 	e := echo.New()
 
-	conf := createConfig(false, false)
+	conf := createBaseConfig(false)
 	logger, observedLogs := initObservedLogger()
 	container := initContainer(conf, logger)
 
@@ -64,17 +88,11 @@ func PrepareForLoggerTest() (*echo.Echo, container.Container, *observer.Observed
 	return e, container, observedLogs
 }
 
-func createConfig(isSecurity bool, useEmail bool) *config.Config {
+func createBaseConfig(isSecurity bool) *config.Config {
 	conf := &config.Config{}
 	conf.Database.Dialect = "sqlite3"
 	conf.Database.Host = "file::memory:?cache=shared"
 	conf.Database.Migration = true
-	conf.Email.Enabled = useEmail
-	conf.Email.Account = "test@test.com"
-	conf.Email.Host = "127.0.0.1"
-	conf.Email.Port = TestEmailServerPort
-	conf.Email.Username = "username"
-	conf.Email.Password = "password"
 	conf.Extension.MasterGenerator = true
 	conf.Extension.SecurityEnabled = isSecurity
 	conf.Log.RequestLogFormat = "${remote_ip} ${account_loginid} ${uri} ${method} ${status}"

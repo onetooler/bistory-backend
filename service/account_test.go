@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccountCreate_Success(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
@@ -37,7 +37,7 @@ func TestAccountCreate_Success(t *testing.T) {
 }
 
 func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 	service := NewAccountService(container)
 
 	createDto := dto.CreateAccountDto{
@@ -51,7 +51,7 @@ func TestAccountCreate_WrongPasswordFailure(t *testing.T) {
 }
 
 func TestAccountGet_Success(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
 
@@ -64,7 +64,7 @@ func TestAccountGet_Success(t *testing.T) {
 }
 
 func TestAccountGet_NotExistsIdFailure(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 	service := NewAccountService(container)
 
 	account, err := service.GetAccount(uint(999))
@@ -73,7 +73,7 @@ func TestAccountGet_NotExistsIdFailure(t *testing.T) {
 }
 
 func TestChangeAccountPassword_Success(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
@@ -89,7 +89,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 }
 
 func TestChangeAccountPassword_WrongPasswordFailure(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
@@ -104,7 +104,7 @@ func TestChangeAccountPassword_WrongPasswordFailure(t *testing.T) {
 }
 
 func TestDeleteAccount_Success(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
@@ -121,7 +121,7 @@ func TestDeleteAccount_Success(t *testing.T) {
 }
 
 func TestDeleteAccount_WrongPasswordFailure(t *testing.T) {
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(false)
 
 	service := NewAccountService(container)
 	savedAccount := createSuccessAccount(service)
@@ -140,15 +140,34 @@ func TestFindAccountByEmail_Success(t *testing.T) {
 		PortNumber:        testutil.TestEmailServerPort,
 	})
 	err := mailServer.Start()
-	defer util.Check(mailServer.Stop)
 	assert.Nil(t, err)
+	defer util.Check(mailServer.Stop)
 
-	container := testutil.PrepareForServiceTest()
+	container := testutil.PrepareForServiceTest(true)
 	service := NewAccountService(container)
 
 	savedAccount := createSuccessAccount(service)
 	err = service.FindAccountByEmail(savedAccount.Email)
 	assert.Nil(t, err)
+}
+
+func TestFindAccountByEmail_NoExistMailFailure(t *testing.T) {
+	mailServer := smtpmock.New(smtpmock.ConfigurationAttr{
+		LogToStdout:         true,
+		LogServerActivity:   true,
+		PortNumber:          testutil.TestEmailServerPort,
+		NotRegisteredEmails: []string{"newTest@example.com"},
+	})
+	err := mailServer.Start()
+	assert.Nil(t, err)
+	defer util.Check(mailServer.Stop)
+
+	container := testutil.PrepareForServiceTest(true)
+	service := NewAccountService(container)
+
+	savedAccount := createSuccessAccount(service)
+	err = service.FindAccountByEmail(savedAccount.Email)
+	assert.NotNil(t, err)
 }
 
 func createSuccessAccount(service AccountService) *model.Account {

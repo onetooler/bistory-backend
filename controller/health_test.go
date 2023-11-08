@@ -12,7 +12,7 @@ import (
 )
 
 func TestGetHealthCheck(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(false)
+	router, container := testutil.PrepareForControllerTest(false, false)
 
 	health := NewHealthController(container)
 	router.GET(config.APIHealth, func(c echo.Context) error { return health.GetHealthCheck(c) })

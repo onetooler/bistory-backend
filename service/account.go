@@ -104,12 +104,12 @@ func (a *accountService) DeleteAccount(id uint, deleteAccountDto *dto.DeleteAcco
 	return nil
 }
 
-func (a *accountService) FindAccountByEmail(loginId string) error {
+func (a *accountService) FindAccountByEmail(email string) error {
 	repo := a.container.GetRepository()
 	emailSender := a.container.GetEmailSender()
 
-	account := model.Account{LoginId: loginId}
-	tx := repo.First(&account)
+	account := model.Account{Email: email}
+	tx := repo.Where(&account).First(&account)
 	if tx.Error != nil {
 		return tx.Error
 	}

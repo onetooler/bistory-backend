@@ -26,7 +26,13 @@ type emailSender struct {
 	templates map[string]*template.Template
 }
 
+type disabledEmailsender struct{}
+
 func NewEmailSender(logger logger.Logger, conf *config.Config, templates map[string]*template.Template) EmailSender {
+	if !conf.Email.Enabled {
+		return &disabledEmailsender{}
+	}
+
 	logger.GetZapLogger().Infof("Try email smtp connection")
 	d := gomail.NewDialer(conf.Email.Host, conf.Email.Port, conf.Email.Username, conf.Email.Password)
 	closer, err := d.Dial()
@@ -66,4 +72,8 @@ func (e emailSender) SendEmail(to, subject, template string, body any) error {
 	msg.SetBody("text/html", buf.String())
 
 	return e.dialer.DialAndSend(msg)
+}
+
+func (e disabledEmailsender) SendEmail(to, subject, template string, body any) error {
+	return fmt.Errorf("email sender disabled by config")
 }

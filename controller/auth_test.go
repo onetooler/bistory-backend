@@ -13,7 +13,7 @@ import (
 )
 
 func TestGetLoginStatus_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(false)
+	router, container := testutil.PrepareForControllerTest(false, false)
 
 	auth := NewAuthController(container)
 	router.GET(config.APIAuthLoginStatus, func(c echo.Context) error { return auth.GetLoginStatus(c) })
@@ -28,7 +28,7 @@ func TestGetLoginStatus_Success(t *testing.T) {
 }
 
 func TestGetLoginAccount_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(false)
+	router, container := testutil.PrepareForControllerTest(false, false)
 
 	auth := NewAuthController(container)
 	router.GET(config.APIAuthLoginAccount, func(c echo.Context) error { return auth.GetLoginAccount(c) })
@@ -42,7 +42,7 @@ func TestGetLoginAccount_Success(t *testing.T) {
 }
 
 func TestLogin_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true, false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
@@ -58,7 +58,7 @@ func TestLogin_Success(t *testing.T) {
 }
 
 func TestLogin_AuthenticationFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true, false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
@@ -74,7 +74,7 @@ func TestLogin_AuthenticationFailure(t *testing.T) {
 }
 
 func TestLogout_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true)
+	router, container := testutil.PrepareForControllerTest(true, false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogout, func(c echo.Context) error { return auth.Logout(c) })

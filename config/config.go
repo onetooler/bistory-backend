@@ -30,6 +30,7 @@ type Config struct {
 		Port               string
 	}
 	Email struct {
+		Enabled  bool `default:"false"`
 		Account  string
 		Host     string
 		Port     int

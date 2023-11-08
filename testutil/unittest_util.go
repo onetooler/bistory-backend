@@ -23,10 +23,10 @@ import (
 const TestEmailServerPort = 2525
 
 // PrepareForControllerTest func prepares the controllers for testing.
-func PrepareForControllerTest(isSecurity bool) (*echo.Echo, container.Container) {
+func PrepareForControllerTest(isSecurity, useEmail bool) (*echo.Echo, container.Container) {
 	e := echo.New()
 
-	conf := createConfig(isSecurity)
+	conf := createConfig(isSecurity, useEmail)
 	logger := initTestLogger()
 	container := initContainer(conf, logger)
 
@@ -39,8 +39,8 @@ func PrepareForControllerTest(isSecurity bool) (*echo.Echo, container.Container)
 }
 
 // PrepareForServiceTest func prepares the services for testing.
-func PrepareForServiceTest() container.Container {
-	conf := createConfig(false)
+func PrepareForServiceTest(useEmail bool) container.Container {
+	conf := createConfig(false, useEmail)
 	logger := initTestLogger()
 	container := initContainer(conf, logger)
 
@@ -53,7 +53,7 @@ func PrepareForServiceTest() container.Container {
 func PrepareForLoggerTest() (*echo.Echo, container.Container, *observer.ObservedLogs) {
 	e := echo.New()
 
-	conf := createConfig(false)
+	conf := createConfig(false, false)
 	logger, observedLogs := initObservedLogger()
 	container := initContainer(conf, logger)
 
@@ -64,13 +64,14 @@ func PrepareForLoggerTest() (*echo.Echo, container.Container, *observer.Observed
 	return e, container, observedLogs
 }
 
-func createConfig(isSecurity bool) *config.Config {
+func createConfig(isSecurity bool, useEmail bool) *config.Config {
 	conf := &config.Config{}
 	conf.Database.Dialect = "sqlite3"
 	conf.Database.Host = "file::memory:?cache=shared"
 	conf.Database.Migration = true
+	conf.Email.Enabled = useEmail
 	conf.Email.Account = "test@test.com"
-	conf.Email.Host = "localhost"
+	conf.Email.Host = "127.0.0.1"
 	conf.Email.Port = TestEmailServerPort
 	conf.Email.Username = "username"
 	conf.Email.Password = "password"

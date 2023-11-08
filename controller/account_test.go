@@ -187,7 +187,7 @@ func TestGetAccount_Success(t *testing.T) {
 		},
 	}
 	router.GET(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)
+		login(container, c, testAccount)
 		return account.GetAccount(c)
 	})
 
@@ -250,7 +250,7 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 		},
 	}
 	router.GET(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)
+		login(container, c, testAccount)
 		return account.GetAccount(c)
 	})
 
@@ -278,7 +278,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 		},
 	}
 	router.POST(config.APIAccountChangePassword, func(c echo.Context) error {
-		login(container, testAccount)
+		login(container, c, testAccount)
 		return account.ChangeAccountPassword(c)
 	})
 
@@ -340,7 +340,7 @@ func TestDeleteAccount_Success(t *testing.T) {
 		},
 	}
 	router.DELETE(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)
+		login(container, c, testAccount)
 		return account.DeleteAccount(c)
 	})
 
@@ -368,7 +368,7 @@ func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
 		},
 	}
 	router.DELETE(config.APIAccountIdPath, func(c echo.Context) error {
-		login(container, testAccount)
+		login(container, c, testAccount)
 		return account.DeleteAccount(c)
 	})
 
@@ -439,8 +439,8 @@ func TestFindLoginId_NoExistAccountFailure(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func login(container container.Container, account model.Account) {
-	_ = container.GetSession().Login(
+func login(testcontainer container.Container, c echo.Context, account model.Account) {
+	_ = testcontainer.GetSession().Login(c,
 		&infrastructure.Account{
 			Id:        account.ID,
 			LoginId:   account.LoginId,

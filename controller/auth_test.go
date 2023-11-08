@@ -85,7 +85,7 @@ func TestLogout_Success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.NotEmpty(t, testutil.GetCookie(rec, "GSESSION"))
+	assert.Empty(t, testutil.GetCookie(rec, "GSESSION"))
 }
 
 func createLoginSuccessAccount() *dto.LoginDto {

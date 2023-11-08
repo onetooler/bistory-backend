@@ -2,12 +2,14 @@ package infrastructure
 
 import (
 	"encoding/json"
-	"net/http"
+	"fmt"
 	"time"
 
 	"github.com/gorilla/sessions"
-	echoSession "github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/logger"
+	"gopkg.in/boj/redistore.v1"
 )
 
 // TODO: change gorilla/sessions to SCS for better performance
@@ -20,22 +22,23 @@ const (
 )
 
 type session struct {
-	context echo.Context
+	store sessions.Store
 }
 
 // Session represents a interface for accessing the session on the application.
 type Session interface {
-	SetContext(c echo.Context)
-	Get() *sessions.Session
-	Save() error
-	Delete() error
-	SetValue(key string, value interface{}) error
-	GetValue(key string) string
-	SetAccount(account *Account) error
-	GetAccount() *Account
-	Login(account *Account) error
-	Logout() error
-	HasAuthorizationTo(uint, uint) bool
+	GetStore() sessions.Store
+
+	Get(c echo.Context) *sessions.Session
+	Save(c echo.Context) error
+	Delete(c echo.Context) error
+	SetValue(c echo.Context, key string, value interface{}) error
+	GetValue(c echo.Context, key string) string
+	SetAccount(c echo.Context, account *Account) error
+	GetAccount(c echo.Context) *Account
+	Login(c echo.Context, account *Account) error
+	Logout(c echo.Context) error
+	HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool
 }
 
 type Account struct {
@@ -46,63 +49,75 @@ type Account struct {
 }
 
 // NewSession is constructor.
-func NewSession() Session {
-	return &session{context: nil}
+func NewSession(logger logger.Logger, conf *config.Config) Session {
+	if !conf.Redis.Enabled {
+		logger.GetZapLogger().Infof("use CookieStore for session")
+		return &session{sessions.NewCookieStore([]byte("secret"))}
+	}
+
+	logger.GetZapLogger().Infof("use redis for session")
+	logger.GetZapLogger().Infof("Try redis connection")
+	address := fmt.Sprintf("%s:%s", conf.Redis.Host, conf.Redis.Port)
+	store, err := redistore.NewRediStore(conf.Redis.ConnectionPoolSize, "tcp", address, "", []byte("secret"))
+	if err != nil {
+		logger.GetZapLogger().Panicf("Failure redis connection, %s", err.Error())
+	}
+	logger.GetZapLogger().Infof(fmt.Sprintf("Success redis connection, %s", address))
+	return &session{store: store}
 }
 
-// SetContext sets the context of echo framework to the session.
-func (s *session) SetContext(c echo.Context) {
-	s.context = c
+func (s *session) GetStore() sessions.Store {
+	return s.store
 }
 
 // Get returns a session for the current request.
-func (s *session) Get() *sessions.Session {
-	sess, _ := echoSession.Get(sessionStr, s.context)
+func (s *session) Get(c echo.Context) *sessions.Session {
+	sess, _ := s.store.Get(c.Request(), sessionStr)
 	return sess
 }
 
 // Save saves the current session.
-func (s *session) Save() error {
-	sess := s.Get()
+func (s *session) Save(c echo.Context) error {
+	sess := s.Get(c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		HttpOnly: true,
 	}
-	return s.saveSession(sess)
+	return s.saveSession(c, sess)
 }
 
 // Delete the current session.
-func (s *session) Delete() error {
-	sess := s.Get()
+func (s *session) Delete(c echo.Context) error {
+	sess := s.Get(c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		HttpOnly: true,
 		MaxAge:   -1,
 	}
-	return s.saveSession(sess)
+	return s.saveSession(c, sess)
 }
 
-func (s *session) saveSession(sess *sessions.Session) error {
-	if err := sess.Save(s.context.Request(), s.context.Response()); err != nil {
-		return s.context.NoContent(http.StatusInternalServerError)
+func (s *session) saveSession(c echo.Context, sess *sessions.Session) error {
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return fmt.Errorf("error occurred while save session")
 	}
 	return nil
 }
 
 // SetValue sets a key and a value.
-func (s *session) SetValue(key string, value interface{}) error {
-	sess := s.Get()
+func (s *session) SetValue(c echo.Context, key string, value interface{}) error {
+	sess := s.Get(c)
 	bytes, err := json.Marshal(value)
 	if err != nil {
-		return s.context.NoContent(http.StatusInternalServerError)
+		return fmt.Errorf("json marshal error while set value in session")
 	}
 	sess.Values[key] = string(bytes)
 	return nil
 }
 
 // GetValue returns value of session.
-func (s *session) GetValue(key string) string {
-	sess := s.Get()
+func (s *session) GetValue(c echo.Context, key string) string {
+	sess := s.Get(c)
 	if sess != nil {
 		if v, ok := sess.Values[key]; ok {
 			data, result := v.(string)
@@ -114,33 +129,33 @@ func (s *session) GetValue(key string) string {
 	return ""
 }
 
-func (s *session) Login(account *Account) error {
+func (s *session) Login(c echo.Context, account *Account) error {
 	account.LoginTime = time.Now()
-	if err := s.SetAccount(account); err != nil {
+	if err := s.SetAccount(c, account); err != nil {
 		return err
 	}
-	if err := s.Save(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *session) Logout() error {
-	if err := s.SetAccount(nil); err != nil {
-		return err
-	}
-	if err := s.Delete(); err != nil {
+	if err := s.Save(c); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *session) SetAccount(account *Account) error {
-	return s.SetValue(accountStr, account)
+func (s *session) Logout(c echo.Context) error {
+	if err := s.SetAccount(c, nil); err != nil {
+		return err
+	}
+	if err := s.Delete(c); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *session) GetAccount() *Account {
-	if v := s.GetValue(accountStr); v != "" {
+func (s *session) SetAccount(c echo.Context, account *Account) error {
+	return s.SetValue(c, accountStr, account)
+}
+
+func (s *session) GetAccount(c echo.Context) *Account {
+	if v := s.GetValue(c, accountStr); v != "" {
 		a := &Account{}
 		_ = json.Unmarshal([]byte(v), a)
 		return a
@@ -148,8 +163,8 @@ func (s *session) GetAccount() *Account {
 	return nil
 }
 
-func (s *session) HasAuthorizationTo(accountId uint, authority uint) bool {
-	currentAccount := s.GetAccount()
+func (s *session) HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool {
+	currentAccount := s.GetAccount(c)
 	if currentAccount == nil {
 		return false
 	}

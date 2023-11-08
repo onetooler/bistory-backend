@@ -36,7 +36,7 @@ func (s Server) Run() {
 	logger.GetZapLogger().Infof("Loaded email templates.")
 
 	email := infrastructure.NewEmailSender(logger, conf, templates)
-	sess := infrastructure.NewSession()
+	sess := infrastructure.NewSession(logger, conf)
 	rep := infrastructure.NewRepository(logger, conf)
 	defer util.Check(rep.Close)
 

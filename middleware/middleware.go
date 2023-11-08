@@ -2,21 +2,18 @@ package middleware
 
 import (
 	"embed"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	echomd "github.com/labstack/echo/v4/middleware"
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/valyala/fasttemplate"
-	"gopkg.in/boj/redistore.v1"
 )
 
 var authorizationPathRegexps map[string]*regexp.Regexp
@@ -61,29 +58,13 @@ func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
 // InitSessionMiddleware initialize a middleware for session management.
 func InitSessionMiddleware(e *echo.Echo, container container.Container) {
 	conf := container.GetConfig()
-	logger := container.GetLogger()
 
-	e.Use(SessionMiddleware(container))
+	e.Use(session.Middleware(container.GetSession().GetStore()))
 
 	if !conf.Extension.SecurityEnabled {
 		return
 	}
 	e.Use(AuthenticationMiddleware(container))
-
-	var sessionStore echo.MiddlewareFunc
-	if conf.Redis.Enabled {
-		logger.GetZapLogger().Infof("Try redis connection")
-		address := fmt.Sprintf("%s:%s", conf.Redis.Host, conf.Redis.Port)
-		store, err := redistore.NewRediStore(conf.Redis.ConnectionPoolSize, "tcp", address, "", []byte("secret"))
-		if err != nil {
-			logger.GetZapLogger().Panicf("Failure redis connection, %s", err.Error())
-		}
-		sessionStore = session.Middleware(store)
-		logger.GetZapLogger().Infof(fmt.Sprintf("Success redis connection, %s", address))
-	} else {
-		sessionStore = session.Middleware(sessions.NewCookieStore([]byte("secret")))
-	}
-	e.Use(sessionStore)
 }
 
 // RequestLoggerMiddleware is middleware for logging the contents of requests.
@@ -103,7 +84,7 @@ func RequestLoggerMiddleware(container container.Container) echo.MiddlewareFunc 
 				case "remote_ip":
 					return w.Write([]byte(c.RealIP()))
 				case "account_loginid":
-					if account := container.GetSession().GetAccount(); account != nil {
+					if account := container.GetSession().GetAccount(c); account != nil {
 						return w.Write([]byte(account.LoginId))
 					}
 					return w.Write([]byte("None"))
@@ -152,19 +133,6 @@ func BodyLoggerMiddleware(container container.Container) echo.MiddlewareFunc {
 			},
 		},
 	)
-}
-
-// SessionMiddleware is a middleware for setting a context to a session.
-func SessionMiddleware(container container.Container) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			container.GetSession().SetContext(c)
-			if err := next(c); err != nil {
-				c.Error(err)
-			}
-			return nil
-		}
-	}
 }
 
 // StaticContentsMiddleware is the middleware for loading the static files.
@@ -228,16 +196,16 @@ func hasAuthorization(c echo.Context, container container.Container) bool {
 		return true
 	}
 
-	account := container.GetSession().GetAccount()
+	account := container.GetSession().GetAccount(c)
 	if account == nil {
 		return false
 	}
 	if account.Authority == uint(model.AuthorityAdmin) && equalPath(currentPath, container.GetConfig().Security.AdminPath) {
-		_ = container.GetSession().Save()
+		_ = container.GetSession().Save(c)
 		return true
 	}
 	if account.Authority <= uint(model.AuthorityUser) && equalPath(currentPath, container.GetConfig().Security.UserPath) {
-		_ = container.GetSession().Save()
+		_ = container.GetSession().Save(c)
 		return true
 	}
 

@@ -37,7 +37,7 @@ func PrepareForControllerTest(isSecurity, useEmail bool) (*echo.Echo, container.
 		conf.Email.Password = "password"
 	}
 	m := miniredis.NewMiniRedis()
-	m.Start()
+	_ = m.Start()
 	conf.Redis.Enabled = true
 	conf.Redis.Host = m.Host()
 	conf.Redis.Port = m.Port()
@@ -101,7 +101,7 @@ func createBaseConfig(isSecurity bool) *config.Config {
 
 func initContainer(conf *config.Config, logger logger.Logger) container.Container {
 	rep := infrastructure.NewRepository(logger, conf)
-	sess := infrastructure.NewSession()
+	sess := infrastructure.NewSession(logger, conf)
 
 	t, _ := template.New(config.FindLoginIdTemplate).Parse("test hello {{.}}\n")
 	templates := map[string]*template.Template{

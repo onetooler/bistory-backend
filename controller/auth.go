@@ -57,7 +57,7 @@ func (controller *authController) GetLoginAccount(c echo.Context) error {
 	if !controller.container.GetConfig().Extension.SecurityEnabled {
 		return c.JSON(http.StatusOK, "Security is disabled")
 	}
-	return c.JSON(http.StatusOK, controller.container.GetSession().GetAccount())
+	return c.JSON(http.StatusOK, controller.container.GetSession().GetAccount(c))
 }
 
 // Login is the method to login using loginId and password by http post.
@@ -77,7 +77,7 @@ func (controller *authController) Login(c echo.Context) error {
 	}
 
 	sess := controller.container.GetSession()
-	if account := sess.GetAccount(); account != nil {
+	if account := sess.GetAccount(c); account != nil {
 		return c.JSON(http.StatusOK, account)
 	}
 
@@ -85,13 +85,17 @@ func (controller *authController) Login(c echo.Context) error {
 	if !authorized {
 		return c.JSON(http.StatusForbidden, false)
 	}
-	_ = sess.Login(
+	err := sess.Login(c,
 		&infrastructure.Account{
 			Id:        account.ID,
 			LoginId:   account.LoginId,
 			Authority: uint(account.Authority),
 		},
 	)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, account)
 }
 
@@ -104,6 +108,9 @@ func (controller *authController) Login(c echo.Context) error {
 // @Success 200
 // @Router /auth/logout [post]
 func (controller *authController) Logout(c echo.Context) error {
-	_ = controller.container.GetSession().Logout()
+	err := controller.container.GetSession().Logout(c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 	return c.NoContent(http.StatusOK)
 }

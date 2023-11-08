@@ -47,7 +47,7 @@ func (controller *accountController) GetAccount(c echo.Context) error {
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
+	if !controller.container.GetSession().HasAuthorizationTo(c, accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -70,7 +70,7 @@ func (controller *accountController) GetAccount(c echo.Context) error {
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
 // @Router /account [post]
 func (controller *accountController) CreateAccount(c echo.Context) error {
-	if controller.container.GetSession().GetAccount() != nil {
+	if controller.container.GetSession().GetAccount(c) != nil {
 		return c.String(http.StatusBadRequest, "this account is already logged in")
 	}
 	data := dto.NewCreateAccountDto()
@@ -101,7 +101,7 @@ func (controller *accountController) ChangeAccountPassword(c echo.Context) error
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
+	if !controller.container.GetSession().HasAuthorizationTo(c, accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -114,7 +114,11 @@ func (controller *accountController) ChangeAccountPassword(c echo.Context) error
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	_ = controller.container.GetSession().Logout()
+	err = controller.container.GetSession().Logout(c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, account)
 }
 
@@ -135,7 +139,7 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 	if accountId == 0 {
 		return c.String(http.StatusBadRequest, "failed to parse id")
 	}
-	if !controller.container.GetSession().HasAuthorizationTo(accountId, uint(model.AuthorityUser)) {
+	if !controller.container.GetSession().HasAuthorizationTo(c, accountId, uint(model.AuthorityUser)) {
 		return c.JSON(http.StatusForbidden, false)
 	}
 
@@ -148,7 +152,10 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	_ = controller.container.GetSession().Logout()
+	err = controller.container.GetSession().Logout(c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, nil)
 }
@@ -165,7 +172,7 @@ func (controller *accountController) DeleteAccount(c echo.Context) error {
 // @Failure 401 {boolean} bool "Failed to the authentication. Returns false."
 // @Router /account/find-login-id [post]
 func (controller *accountController) FindLoginId(c echo.Context) error {
-	if controller.container.GetSession().GetAccount() != nil {
+	if controller.container.GetSession().GetAccount(c) != nil {
 		return c.String(http.StatusBadRequest, "this account is already logged in")
 	}
 

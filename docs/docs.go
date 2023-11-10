@@ -489,8 +489,14 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "loginFailCount": {
+                    "type": "integer"
+                },
                 "loginId": {
                     "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.Status"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -506,6 +512,17 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "AuthorityAdmin",
                 "AuthorityUser"
+            ]
+        },
+        "model.Status": {
+            "type": "integer",
+            "enum": [
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "StatusActive",
+                "StatusInactive"
             ]
         }
     }

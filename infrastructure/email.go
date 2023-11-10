@@ -18,10 +18,6 @@ type EmailSender interface {
 
 type emailSender struct {
 	account   string
-	host      string
-	port      int
-	username  string
-	password  string
 	dialer    *gomail.Dialer
 	templates map[string]*template.Template
 }
@@ -45,10 +41,6 @@ func NewEmailSender(logger logger.Logger, conf *config.Config, templates map[str
 
 	return &emailSender{
 		account:   conf.Email.Account,
-		host:      conf.Email.Host,
-		port:      conf.Email.Port,
-		username:  conf.Email.Username,
-		password:  conf.Email.Password,
 		dialer:    d,
 		templates: templates,
 	}

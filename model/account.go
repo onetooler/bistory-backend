@@ -9,12 +9,12 @@ import (
 // Account defines struct of account data.
 type Account struct {
 	gorm.Model
-	LoginId        string    `gorm:"unique;not null" json:"loginId"`
-	Email          string    `gorm:"unique;not null" json:"email"`
-	Password       string    `json:"-"`
-	Authority      Authority `json:"authority"`
-	Status         Status    `json:"status"`
-	LoginFailCount uint      `json:"loginFailCount"`
+	LoginId    string    `gorm:"unique;not null" json:"loginId"`
+	Email      string    `gorm:"unique;not null" json:"email"`
+	Password   string    `json:"-"`
+	Authority  Authority `json:"authority"`
+	Status     Status    `json:"status"`
+	BadAttempt uint      `json:"badAttempt"`
 }
 
 type Authority uint
@@ -72,9 +72,22 @@ func (a *Account) ToString() string {
 	return toString(a)
 }
 
-func (a Account) CheckPassword(plainPassword string) bool {
+func (a *Account) CheckPassword(plainPassword string) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(plainPassword)); err != nil {
+		a.BadAttempt++
+		if a.RemainAttempt() <= 0 {
+			a.Status = StatusInactive
+		}
 		return false
 	}
+	a.BadAttempt = 0
 	return true
+}
+
+func (a *Account) IsActive() bool {
+	return a.Status == StatusActive
+}
+
+func (a *Account) RemainAttempt() int {
+	return config.MaxLoginAttempts - int(a.BadAttempt)
 }

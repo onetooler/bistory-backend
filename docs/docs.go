@@ -477,6 +477,9 @@ const docTemplate = `{
                 "authority": {
                     "$ref": "#/definitions/model.Authority"
                 },
+                "badAttempt": {
+                    "type": "integer"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -487,9 +490,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "loginFailCount": {
                     "type": "integer"
                 },
                 "loginId": {

@@ -81,11 +81,11 @@ func (controller *authController) Login(c echo.Context) error {
 		return c.JSON(http.StatusOK, account)
 	}
 
-	authorized, account := controller.service.AuthenticateByLoginIdAndPassword(dto.LoginId, dto.Password)
-	if !authorized {
-		return c.JSON(http.StatusForbidden, false)
+	account, err := controller.service.AuthenticateByLoginIdAndPassword(dto.LoginId, dto.Password)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
-	err := sess.Login(c,
+	err = sess.Login(c,
 		&infrastructure.Account{
 			Id:        account.ID,
 			LoginId:   account.LoginId,

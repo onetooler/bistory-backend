@@ -12,8 +12,11 @@ const (
 	LoggerConfigPath   = "resources/config/zaplogger.%s.yml"
 )
 
-// PasswordHashCost is hash cost for a password.
-const PasswordHashCost int = 10
+// Constant about account domain
+const (
+	PasswordHashCost int = 10
+	MaxLoginAttempts int = 5
+)
 
 const (
 	// API represents the group of API.

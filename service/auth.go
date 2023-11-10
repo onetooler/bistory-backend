@@ -1,13 +1,15 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
 )
 
 // AuthService is a service for authentication.
 type AuthService interface {
-	AuthenticateByLoginIdAndPassword(loginId string, password string) (bool, *model.Account)
+	AuthenticateByLoginIdAndPassword(loginId string, password string) (*model.Account, error)
 }
 
 type authService struct {
@@ -20,19 +22,25 @@ func NewAuthService(container container.Container) AuthService {
 }
 
 // AuthenticateByLoginIdAndPassword authenticates by using loginId and plain text password.
-func (a *authService) AuthenticateByLoginIdAndPassword(loginId string, password string) (bool, *model.Account) {
+func (a *authService) AuthenticateByLoginIdAndPassword(loginId string, password string) (*model.Account, error) {
 	account, err := a.findByLoginId(loginId)
 	if err != nil {
-		a.container.GetLogger().GetZapLogger().Errorf(err.Error())
-		return false, nil
+		return nil, err
+	}
+	if !account.IsActive() {
+		return nil, fmt.Errorf("account is not active")
 	}
 
-	if !account.CheckPassword(password) {
-		a.container.GetLogger().GetZapLogger().Errorf("password not matched")
-		return false, nil
+	ok := account.CheckPassword(password)
+	a.container.GetRepository().Save(account) // save
+	if !ok {
+		if account.RemainAttempt() > 0 {
+			return nil, fmt.Errorf("password not matched. remain attempt count is %d", account.RemainAttempt())
+		}
+		return nil, fmt.Errorf("password not matched. account has been deactivated")
 	}
 
-	return true, account
+	return account, nil
 }
 
 func (a *authService) findByLoginId(loginId string) (*model.Account, error) {

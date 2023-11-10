@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
-	_ "github.com/onetooler/bistory-backend/docs" // for using echo-swagger
 	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/stretchr/testify/assert"
 )

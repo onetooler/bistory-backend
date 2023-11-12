@@ -3,13 +3,16 @@ package service
 import (
 	"fmt"
 
+	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/container"
 	"github.com/onetooler/bistory-backend/model"
+	"github.com/onetooler/bistory-backend/util"
 )
 
 // AuthService is a service for authentication.
 type AuthService interface {
 	AuthenticateByLoginIdAndPassword(loginId string, password string) (*model.Account, error)
+	EmailVerificationTokenSend(email string) (*string, error)
 }
 
 type authService struct {
@@ -41,6 +44,19 @@ func (a *authService) AuthenticateByLoginIdAndPassword(loginId string, password 
 	}
 
 	return account, nil
+}
+
+// EmailVerificationTokenSend send token to email and return that token.
+func (a *authService) EmailVerificationTokenSend(email string) (*string, error) {
+	emailSender := a.container.GetEmailSender()
+	token := util.RandomBase16String(config.EmailVerificationTokenLength)
+	// TODO: Change to Constant
+	subject := "[Bistory] 이메일 인증 코드"
+	err := emailSender.SendEmail(email, subject, config.EmailVerificationTemplate, token)
+	if err != nil {
+		return nil, err
+	}
+	return &token, nil
 }
 
 func (a *authService) findByLoginId(loginId string) (*model.Account, error) {

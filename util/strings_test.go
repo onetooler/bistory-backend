@@ -30,3 +30,11 @@ func TestConvertToUint_Number(t *testing.T) {
 	result := ConvertToUint("123")
 	assert.Exactly(t, uint(123), result)
 }
+
+func TestRandomBase16String_Success(t *testing.T) {
+	random1 := RandomBase16String(6)
+	random2 := RandomBase16String(6)
+	assert.Len(t, random1, 6)
+	assert.Len(t, random2, 6)
+	assert.NotEqual(t, random1, random2)
+}

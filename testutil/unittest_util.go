@@ -105,7 +105,8 @@ func initContainer(conf *config.Config, logger logger.Logger) container.Containe
 
 	t, _ := template.New(config.FindLoginIdTemplate).Parse("test hello {{.}}\n")
 	templates := map[string]*template.Template{
-		config.FindLoginIdTemplate: t,
+		config.FindLoginIdTemplate:       t,
+		config.EmailVerificationTemplate: t,
 	}
 	emailSender := infrastructure.NewEmailSender(logger, conf, templates)
 

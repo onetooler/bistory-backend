@@ -3,9 +3,11 @@ package service
 import (
 	"testing"
 
+	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/model"
 	"github.com/onetooler/bistory-backend/testutil"
+	"github.com/onetooler/bistory-backend/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,4 +60,23 @@ func TestAuthenticateByLoginIdAndPassword_AuthenticationMaxFailure(t *testing.T)
 	account, err := service.AuthenticateByLoginIdAndPassword("test", "test")
 	assert.Nil(t, account)
 	assert.NotNil(t, err)
+}
+
+func TestEmailVerificationTokenSend_Success(t *testing.T) {
+	mailServer := smtpmock.New(smtpmock.ConfigurationAttr{
+		LogToStdout:       true,
+		LogServerActivity: true,
+		PortNumber:        testutil.TestEmailServerPort,
+	})
+	err := mailServer.Start()
+	assert.Nil(t, err)
+	defer util.Check(mailServer.Stop)
+
+	container := testutil.PrepareForServiceTest(true)
+	service := NewAuthService(container)
+
+	testEmail := "testEmail@example.com"
+	token, err := service.EmailVerificationTokenSend(testEmail)
+	assert.Nil(t, err)
+	assert.NotNil(t, token)
 }

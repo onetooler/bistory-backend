@@ -4,18 +4,20 @@ package config
 const ErrExitStatus int = 2
 
 const (
-	EmailTemplatesPath  = "resources/email"
-	FindLoginIdTemplate = "find-login-id.html"
+	EmailTemplatesPath        = "resources/email"
+	FindLoginIdTemplate       = "find-login-id.html"
+	EmailVerificationTemplate = "email-verification.html"
 
 	AppConfigPath      = "resources/config/application.%s.yml"
 	MessagesConfigPath = "resources/config/messages.properties"
 	LoggerConfigPath   = "resources/config/zaplogger.%s.yml"
 )
 
-// Constant about account domain
+// Constant about account&auth domain
 const (
-	PasswordHashCost int = 10
-	MaxLoginAttempts int = 5
+	PasswordHashCost             int = 10
+	MaxLoginAttempts             int = 5
+	EmailVerificationTokenLength int = 6
 )
 
 const (

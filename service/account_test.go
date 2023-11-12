@@ -152,6 +152,7 @@ func TestFindAccountByEmail_Success(t *testing.T) {
 	}
 	err = service.FindAccountByEmail(&dto)
 	assert.Nil(t, err)
+	assert.Contains(t, mailServer.Messages()[1].MsgRequest(), savedAccount.LoginId)
 }
 
 func TestFindAccountByEmail_NoExistMailFailure(t *testing.T) {

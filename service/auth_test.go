@@ -79,4 +79,5 @@ func TestEmailVerificationTokenSend_Success(t *testing.T) {
 	token, err := service.EmailVerificationTokenSend(testEmail)
 	assert.Nil(t, err)
 	assert.NotNil(t, token)
+	assert.Contains(t, mailServer.Messages()[1].MsgRequest(), *token)
 }

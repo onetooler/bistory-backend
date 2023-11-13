@@ -34,12 +34,12 @@ type Session interface {
 	Get(c echo.Context) *sessions.Session
 	Save(c echo.Context) error
 	Delete(c echo.Context) error
-	SetValue(c echo.Context, key string, value interface{}) error
+	SetValue(c echo.Context, key string, value string) error
 	GetValue(c echo.Context, key string) string
 	SetAccount(c echo.Context, account *Account) error
 	GetAccount(c echo.Context) *Account
 	SetEmailVerificationToken(c echo.Context, token string) error
-	GetEmailVerificationToken(c echo.Context) string
+	VerifyEmailToken(c echo.Context, token string) error
 	Login(c echo.Context, account *Account) error
 	Logout(c echo.Context) error
 	HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool
@@ -109,13 +109,9 @@ func (s *session) saveSession(c echo.Context, sess *sessions.Session) error {
 }
 
 // SetValue sets a key and a value.
-func (s *session) SetValue(c echo.Context, key string, value interface{}) error {
+func (s *session) SetValue(c echo.Context, key string, value string) error {
 	sess := s.Get(c)
-	bytes, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("json marshal error while set value in session")
-	}
-	sess.Values[key] = string(bytes)
+	sess.Values[key] = value
 	return nil
 }
 
@@ -155,7 +151,11 @@ func (s *session) Logout(c echo.Context) error {
 }
 
 func (s *session) SetAccount(c echo.Context, account *Account) error {
-	return s.SetValue(c, accountStr, account)
+	bytes, err := json.Marshal(account)
+	if err != nil {
+		return fmt.Errorf("json marshal error while set value in session")
+	}
+	return s.SetValue(c, accountStr, string(bytes))
 }
 
 func (s *session) GetAccount(c echo.Context) *Account {
@@ -168,11 +168,18 @@ func (s *session) GetAccount(c echo.Context) *Account {
 }
 
 func (s *session) SetEmailVerificationToken(c echo.Context, token string) error {
-	return s.SetValue(c, emailVerificationStr, token)
+	if err := s.SetValue(c, emailVerificationStr, token); err != nil {
+		return err
+	}
+	return s.Save(c)
 }
 
-func (s *session) GetEmailVerificationToken(c echo.Context) string {
-	return s.GetValue(c, emailVerificationStr)
+func (s *session) VerifyEmailToken(c echo.Context, token string) error {
+	savedToken := s.GetValue(c, emailVerificationStr)
+	if savedToken != token {
+		return fmt.Errorf("token not matched")
+	}
+	return s.SetValue(c, emailVerificationStr, "VERIFIED")
 }
 
 func (s *session) HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool {

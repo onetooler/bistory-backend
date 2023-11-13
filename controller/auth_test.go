@@ -115,7 +115,38 @@ func TestEmailVerificationTokenSend_Success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Empty(t, testutil.GetCookie(rec, "GSESSION"))
+	assert.NotEmpty(t, testutil.GetCookie(rec, "GSESSION"))
+}
+
+func TestEmailVerificationTokenVerify_Success(t *testing.T) {
+	router, container := testutil.PrepareForControllerTest(false)
+	auth := NewAuthController(container)
+
+	token := "123456"
+	router.POST(config.APIAuthEmailVerificationTokenSend, func(c echo.Context) error {
+		_ = container.GetSession().SetEmailVerificationToken(c, token)
+		return c.NoContent(http.StatusOK)
+	})
+	preRec := httptest.NewRecorder()
+	router.ServeHTTP(
+		preRec,
+		testutil.NewJSONRequest("POST", config.APIAuthEmailVerificationTokenSend, nil),
+	)
+
+	preRec.Result().Cookies()
+	router.POST(config.APIAuthVerifyEmail, func(c echo.Context) error {
+		return auth.EmailVerificationTokenVerify(c)
+	})
+	dto := dto.EmailVerificationTokenVerifyDto{
+		Token: token,
+	}
+	req := testutil.NewJSONRequest("POST", config.APIAuthVerifyEmail, dto)
+	for _, cookie := range preRec.Result().Cookies() {
+		req.AddCookie(cookie)
+	}
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	assert.Equal(t, http.StatusOK, rec.Code)
 }
 
 func createLoginSuccessAccount() *dto.LoginDto {

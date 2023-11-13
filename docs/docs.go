@@ -255,7 +255,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/email-verification": {
+        "/auth/email-verification/token-generate": {
             "post": {
                 "description": "Login using loginId and password.",
                 "consumes": [
@@ -287,6 +287,43 @@ const docTemplate = `{
                         "description": "Failed to send verification token.",
                         "schema": {
                             "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/email-verification/token-verify": {
+            "post": {
+                "description": "EmailVerificationTokenVerify using token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "EmailVerificationTokenVerify using token.",
+                "parameters": [
+                    {
+                        "description": "Token for verification.",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmailVerificationTokenVerifyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Failed to verify token.",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -478,6 +515,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.EmailVerificationTokenVerifyDto": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }

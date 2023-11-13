@@ -34,7 +34,8 @@ const (
 	APIAuthLogin        = APIAuth + "/login"
 	APIAuthLogout       = APIAuth + "/logout"
 
-	APIAuthEmailVerificationTokenSend = APIAuth + "/email-verification"
+	APIAuthEmailVerificationTokenSend = APIAuth + "/email-verification/token-generate"
+	APIAuthVerifyEmail                = APIAuth + "/email-verification/token-verify"
 )
 
 const (

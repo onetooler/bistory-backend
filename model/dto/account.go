@@ -69,3 +69,11 @@ type EmailVerificationTokenSendDto struct {
 func NewEmailVerificationTokenSendDto() *EmailVerificationTokenSendDto {
 	return &EmailVerificationTokenSendDto{}
 }
+
+type EmailVerificationTokenVerifyDto struct {
+	Token string `json:"token"`
+}
+
+func NewEmailVerificationTokenVerifyDto() *EmailVerificationTokenVerifyDto {
+	return &EmailVerificationTokenVerifyDto{}
+}

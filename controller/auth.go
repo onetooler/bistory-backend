@@ -17,6 +17,7 @@ type AuthController interface {
 	Login(c echo.Context) error
 	Logout(c echo.Context) error
 	EmailVerificationTokenSend(c echo.Context) error
+	EmailVerificationTokenVerify(c echo.Context) error
 }
 
 type authController struct {
@@ -122,7 +123,7 @@ func (controller *authController) Logout(c echo.Context) error {
 // @Param data body dto.EmailVerificationTokenSendDto true "Email for verification."
 // @Success 200
 // @Failure 401 {boolean} bool "Failed to send verification token."
-// @Router /auth/email-verification [post]
+// @Router /auth/email-verification/token-generate [post]
 func (controller *authController) EmailVerificationTokenSend(c echo.Context) error {
 	dto := dto.NewEmailVerificationTokenSendDto()
 	if err := c.Bind(dto); err != nil {
@@ -142,6 +143,34 @@ func (controller *authController) EmailVerificationTokenSend(c echo.Context) err
 	err = sess.SetEmailVerificationToken(c, *token)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+// EmailVerificationTokenVerify is check token that sended by EmailVerificationTokenSend.
+// @Summary EmailVerificationTokenVerify using token.
+// @Description EmailVerificationTokenVerify using token.
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param data body dto.EmailVerificationTokenVerifyDto true "Token for verification."
+// @Success 200
+// @Failure 400 {string} message "Failed to verify token."
+// @Router /auth/email-verification/token-verify [post]
+func (controller *authController) EmailVerificationTokenVerify(c echo.Context) error {
+	dto := dto.NewEmailVerificationTokenVerifyDto()
+	if err := c.Bind(dto); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	sess := controller.container.GetSession()
+	if account := sess.GetAccount(c); account != nil {
+		return c.String(http.StatusBadRequest, "this account is already logged in")
+	}
+
+	if err := sess.VerifyEmailToken(c, dto.Token); err != nil {
+		return c.String(http.StatusBadRequest, "token verification failed")
 	}
 
 	return c.NoContent(http.StatusOK)

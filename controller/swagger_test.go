@@ -12,7 +12,7 @@ import (
 )
 
 func TestSwagger(t *testing.T) {
-	router, _ := testutil.PrepareForControllerTest(false, false)
+	router, _ := testutil.PrepareForControllerTest(false)
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	req := httptest.NewRequest("GET", "/swagger/index.html", nil)

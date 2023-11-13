@@ -57,13 +57,7 @@ func InitLoggerMiddleware(e *echo.Echo, container container.Container) {
 
 // InitSessionMiddleware initialize a middleware for session management.
 func InitSessionMiddleware(e *echo.Echo, container container.Container) {
-	conf := container.GetConfig()
-
 	e.Use(session.Middleware(container.GetSession().GetStore()))
-
-	if !conf.Extension.SecurityEnabled {
-		return
-	}
 	e.Use(AuthenticationMiddleware(container))
 }
 

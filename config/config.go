@@ -40,7 +40,6 @@ type Config struct {
 	Extension struct {
 		MasterGenerator bool `yaml:"master_generator" default:"false"`
 		CorsEnabled     bool `yaml:"cors_enabled" default:"false"`
-		SecurityEnabled bool `yaml:"security_enabled" default:"false"`
 	}
 	Log struct {
 		RequestLogFormat string `yaml:"request_log_format" default:"${remote_ip} ${account_loginid} ${uri} ${method} ${status}"`

@@ -19,7 +19,7 @@ type sessionController struct {
 
 func TestSessionRace_Success(t *testing.T) {
 	sessionKey := "Key"
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 	session := sessionController{container: container}
 	router.GET(config.API+"1", func(c echo.Context) error {
 		_ = session.container.GetSession().SetValue(c, sessionKey, 1)

@@ -50,7 +50,7 @@ func (m *mockService) FindAccountByEmail(dto *dto.FindLoginIdDto) error {
 }
 
 func TestCreateAccount_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
@@ -97,7 +97,7 @@ func TestCreateAccount_Success(t *testing.T) {
 }
 
 func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
@@ -123,7 +123,7 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 }
 
 func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
@@ -149,7 +149,7 @@ func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
 }
 
 func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
@@ -175,7 +175,7 @@ func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
 }
 
 func TestGetAccount_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -211,7 +211,7 @@ func TestGetAccount_Success(t *testing.T) {
 }
 
 func TestGetAccount_NoLoginFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -238,7 +238,7 @@ func TestGetAccount_NoLoginFailure(t *testing.T) {
 }
 
 func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -266,7 +266,7 @@ func TestGetAccount_NoAuthorizationFailure(t *testing.T) {
 }
 
 func TestChangeAccountPassword_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -302,7 +302,7 @@ func TestChangeAccountPassword_Success(t *testing.T) {
 }
 
 func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -328,7 +328,7 @@ func TestChangeAccountPassword_NoAuthorizationFailure(t *testing.T) {
 }
 
 func TestDeleteAccount_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -356,7 +356,7 @@ func TestDeleteAccount_Success(t *testing.T) {
 }
 
 func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -386,7 +386,7 @@ func TestDeleteAccount_NoAuthorizationFailure(t *testing.T) {
 }
 
 func TestFindLoginId_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{
@@ -413,7 +413,7 @@ func TestFindLoginId_Success(t *testing.T) {
 }
 
 func TestFindLoginId_NoExistAccountFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	testAccount := newTestUserAccount()
 	account := accountController{

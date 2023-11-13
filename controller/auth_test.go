@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetLoginStatus_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(false, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	auth := NewAuthController(container)
 	router.GET(config.APIAuthLoginStatus, func(c echo.Context) error { return auth.GetLoginStatus(c) })
@@ -30,7 +30,7 @@ func TestGetLoginStatus_Success(t *testing.T) {
 }
 
 func TestGetLoginAccount_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(false, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	auth := NewAuthController(container)
 	router.GET(config.APIAuthLoginAccount, func(c echo.Context) error { return auth.GetLoginAccount(c) })
@@ -44,7 +44,7 @@ func TestGetLoginAccount_Success(t *testing.T) {
 }
 
 func TestLogin_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
@@ -60,7 +60,7 @@ func TestLogin_Success(t *testing.T) {
 }
 
 func TestLogin_AuthenticationFailure(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
@@ -76,7 +76,7 @@ func TestLogin_AuthenticationFailure(t *testing.T) {
 }
 
 func TestLogout_Success(t *testing.T) {
-	router, container := testutil.PrepareForControllerTest(true, false)
+	router, container := testutil.PrepareForControllerTest(false)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthLogout, func(c echo.Context) error { return auth.Logout(c) })
@@ -100,7 +100,7 @@ func TestEmailVerificationTokenSend_Success(t *testing.T) {
 	assert.Nil(t, err)
 	defer util.Check(mailServer.Stop)
 
-	router, container := testutil.PrepareForControllerTest(true, true)
+	router, container := testutil.PrepareForControllerTest(true)
 
 	auth := NewAuthController(container)
 	router.POST(config.APIAuthEmailVerificationTokenSend, func(c echo.Context) error { return auth.EmailVerificationTokenSend(c) })

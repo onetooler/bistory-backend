@@ -8,16 +8,15 @@ database:
   migration: false
 
 email:
-  Account: 
-  Host: 
-  Port: 
-  Username: 
-  Password: 
+  Account:
+  Host:
+  Port:
+  Username:
+  Password:
 
 extension:
   master_generator: false
   cors_enabled: false
-  security_enabled: true
 
 log:
   request_log_format: ${remote_ip} ${account_loginid} ${uri} ${method} ${status}

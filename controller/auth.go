@@ -55,9 +55,6 @@ func (controller *authController) GetLoginStatus(c echo.Context) error {
 // @Failure 401 {boolean} bool "The current user haven't logged-in yet. Returns false."
 // @Router /auth/loginAccount [get]
 func (controller *authController) GetLoginAccount(c echo.Context) error {
-	if !controller.container.GetConfig().Extension.SecurityEnabled {
-		return c.JSON(http.StatusOK, "Security is disabled")
-	}
 	return c.JSON(http.StatusOK, controller.container.GetSession().GetAccount(c))
 }
 

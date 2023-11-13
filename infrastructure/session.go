@@ -214,6 +214,9 @@ func (s *session) VerifyEmailToken(c echo.Context, token string) error {
 
 func (s *session) IsVerifiedEmail(c echo.Context, email string) (bool, error) {
 	emailVerification := s.GetEmailVerification(c)
+	if emailVerification.VerifiedAt.IsZero() {
+		return false, fmt.Errorf("not verified yet")
+	}
 	if emailVerification.VerifiedAt.Before(time.Now().Add(-config.EmailVerificationLifetime)) {
 		_ = s.SetEmailVerification(c, nil)
 		return false, fmt.Errorf("verification expired")

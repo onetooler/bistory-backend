@@ -257,7 +257,7 @@ const docTemplate = `{
         },
         "/auth/email-verification/token-generate": {
             "post": {
-                "description": "Login using loginId and password.",
+                "description": "EmailVerificationTokenSend generate token and send it to email.",
                 "consumes": [
                     "application/json"
                 ],
@@ -267,7 +267,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "EmailVerificationTokenSend using loginId and password.",
+                "summary": "EmailVerificationTokenSend generate token and send it to email.",
                 "parameters": [
                     {
                         "description": "Email for verification.",
@@ -283,10 +283,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK"
                     },
-                    "401": {
+                    "400": {
                         "description": "Failed to send verification token.",
                         "schema": {
-                            "type": "boolean"
+                            "type": "string"
                         }
                     }
                 }

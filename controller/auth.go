@@ -115,14 +115,14 @@ func (controller *authController) Logout(c echo.Context) error {
 }
 
 // EmailVerificationTokenSend is the method to email verify using token.
-// @Summary EmailVerificationTokenSend using loginId and password.
-// @Description Login using loginId and password.
+// @Summary EmailVerificationTokenSend generate token and send it to email.
+// @Description EmailVerificationTokenSend generate token and send it to email.
 // @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Param data body dto.EmailVerificationTokenSendDto true "Email for verification."
 // @Success 200
-// @Failure 401 {boolean} bool "Failed to send verification token."
+// @Failure 400 {string} message "Failed to send verification token."
 // @Router /auth/email-verification/token-generate [post]
 func (controller *authController) EmailVerificationTokenSend(c echo.Context) error {
 	dto := dto.NewEmailVerificationTokenSendDto()

@@ -19,6 +19,8 @@ const (
 	sessionStr = "GSESSION"
 	// accountStr is the key of account data in the session.
 	accountStr = "Account"
+	// emailVerification is the key of email verification token in the session.
+	emailVerificationStr = "EmailVerification"
 )
 
 type session struct {
@@ -36,6 +38,8 @@ type Session interface {
 	GetValue(c echo.Context, key string) string
 	SetAccount(c echo.Context, account *Account) error
 	GetAccount(c echo.Context) *Account
+	SetEmailVerificationToken(c echo.Context, token string) error
+	GetEmailVerificationToken(c echo.Context) string
 	Login(c echo.Context, account *Account) error
 	Logout(c echo.Context) error
 	HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool
@@ -161,6 +165,14 @@ func (s *session) GetAccount(c echo.Context) *Account {
 		return a
 	}
 	return nil
+}
+
+func (s *session) SetEmailVerificationToken(c echo.Context, token string) error {
+	return s.SetValue(c, emailVerificationStr, token)
+}
+
+func (s *session) GetEmailVerificationToken(c echo.Context) string {
+	return s.GetValue(c, emailVerificationStr)
 }
 
 func (s *session) HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool {

@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/onetooler/bistory-backend/config"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/testutil"
+	"github.com/onetooler/bistory-backend/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -80,6 +82,34 @@ func TestLogout_Success(t *testing.T) {
 	router.POST(config.APIAuthLogout, func(c echo.Context) error { return auth.Logout(c) })
 
 	req := testutil.NewJSONRequest("POST", config.APIAuthLogout, nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Empty(t, testutil.GetCookie(rec, "GSESSION"))
+}
+
+func TestEmailVerificationTokenSend_Success(t *testing.T) {
+	mailServer := smtpmock.New(smtpmock.ConfigurationAttr{
+		LogToStdout:       true,
+		LogServerActivity: true,
+		PortNumber:        testutil.TestEmailServerPort,
+	})
+	err := mailServer.Start()
+	assert.Nil(t, err)
+	defer util.Check(mailServer.Stop)
+
+	router, container := testutil.PrepareForControllerTest(true, true)
+
+	auth := NewAuthController(container)
+	router.POST(config.APIAuthEmailVerificationTokenSend, func(c echo.Context) error { return auth.EmailVerificationTokenSend(c) })
+
+	dto := dto.EmailVerificationTokenSendDto{
+		Email: "newTest@example.com",
+	}
+
+	req := testutil.NewJSONRequest("POST", config.APIAuthEmailVerificationTokenSend, dto)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)

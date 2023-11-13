@@ -16,6 +16,7 @@ type AuthController interface {
 	GetLoginAccount(c echo.Context) error
 	Login(c echo.Context) error
 	Logout(c echo.Context) error
+	EmailVerificationTokenSend(c echo.Context) error
 }
 
 type authController struct {
@@ -112,5 +113,39 @@ func (controller *authController) Logout(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+	return c.NoContent(http.StatusOK)
+}
+
+// EmailVerificationTokenSend is the method to email verify using token.
+// @Summary EmailVerificationTokenSend using loginId and password.
+// @Description Login using loginId and password.
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param data body dto.EmailVerificationTokenSendDto true "Email for verification."
+// @Success 200
+// @Failure 401 {boolean} bool "Failed to send verification token."
+// @Router /auth/email-verification [post]
+func (controller *authController) EmailVerificationTokenSend(c echo.Context) error {
+	dto := dto.NewEmailVerificationTokenSendDto()
+	if err := c.Bind(dto); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	sess := controller.container.GetSession()
+	if account := sess.GetAccount(c); account != nil {
+		return c.String(http.StatusBadRequest, "already logged-in")
+	}
+
+	token, err := controller.service.EmailVerificationTokenSend(dto.Email)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	err = sess.SetEmailVerificationToken(c, *token)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.NoContent(http.StatusOK)
 }

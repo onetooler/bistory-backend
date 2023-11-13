@@ -61,3 +61,11 @@ type FindLoginIdDto struct {
 func NewFindLoginIdDto() *FindLoginIdDto {
 	return &FindLoginIdDto{}
 }
+
+type EmailVerificationTokenSendDto struct {
+	Email string `json:"email"`
+}
+
+func NewEmailVerificationTokenSendDto() *EmailVerificationTokenSendDto {
+	return &EmailVerificationTokenSendDto{}
+}

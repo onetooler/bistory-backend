@@ -33,6 +33,8 @@ const (
 	APIAuthLoginAccount = APIAuth + "/loginAccount"
 	APIAuthLogin        = APIAuth + "/login"
 	APIAuthLogout       = APIAuth + "/logout"
+
+	APIAuthEmailVerificationTokenSend = APIAuth + "/email-verification"
 )
 
 const (

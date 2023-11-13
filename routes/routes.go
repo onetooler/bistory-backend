@@ -35,6 +35,7 @@ func setAuthController(e *echo.Echo, container container.Container) {
 	if container.GetConfig().Extension.SecurityEnabled {
 		e.POST(config.APIAuthLogin, func(c echo.Context) error { return auth.Login(c) })
 		e.POST(config.APIAuthLogout, func(c echo.Context) error { return auth.Logout(c) })
+		e.POST(config.APIAuthEmailVerificationTokenSend, func(c echo.Context) error { return auth.EmailVerificationTokenSend(c) })
 	}
 }
 

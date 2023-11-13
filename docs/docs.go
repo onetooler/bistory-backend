@@ -255,6 +255,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/email-verification": {
+            "post": {
+                "description": "Login using loginId and password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "EmailVerificationTokenSend using loginId and password.",
+                "parameters": [
+                    {
+                        "description": "Email for verification.",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmailVerificationTokenSendDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Failed to send verification token.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Login using loginId and password.",
@@ -433,6 +470,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.EmailVerificationTokenSendDto": {
+            "type": "object",
+            "properties": {
+                "email": {
                     "type": "string"
                 }
             }

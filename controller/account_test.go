@@ -70,7 +70,12 @@ func TestCreateAccount_Success(t *testing.T) {
 			},
 		},
 	}
-	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
+	router.POST(config.APIAccount, func(c echo.Context) error {
+		_ = container.GetSession().SetEmailVerification(c,
+			&infrastructure.EmailVerification{Email: "newTest@example.com", VerifiedAt: time.Now()},
+		)
+		return account.CreateAccount(c)
+	})
 
 	dto := dto.CreateAccountDto{
 		LoginId:  "newTest",
@@ -107,7 +112,12 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 			},
 		},
 	}
-	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
+	router.POST(config.APIAccount, func(c echo.Context) error {
+		_ = container.GetSession().SetEmailVerification(c,
+			&infrastructure.EmailVerification{Email: "newTest@example.com", VerifiedAt: time.Now()},
+		)
+		return account.CreateAccount(c)
+	})
 
 	dto := dto.CreateAccountDto{
 		LoginId:  "newTest",
@@ -122,22 +132,27 @@ func TestCreateAccount_WrongPasswordFailure(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
+func TestCreateAccount_DuplicatedUniqueValueFailure(t *testing.T) {
 	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
 		&mockService{
 			createAccount: func(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
-				return nil, fmt.Errorf("duplicated LoginId")
+				return nil, fmt.Errorf("duplicated Email or LoginId")
 			},
 		},
 	}
-	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
+	router.POST(config.APIAccount, func(c echo.Context) error {
+		_ = container.GetSession().SetEmailVerification(c,
+			&infrastructure.EmailVerification{Email: "newTest@example.com", VerifiedAt: time.Now()},
+		)
+		return account.CreateAccount(c)
+	})
 
 	dto := dto.CreateAccountDto{
-		LoginId:  "test",
-		Email:    "newTest@example.com",
+		LoginId:  "newTest",
+		Email:    "test@example.com",
 		Password: "newTestTest",
 	}
 	req := testutil.NewJSONRequest(http.MethodPost, config.APIAccount, dto)
@@ -148,18 +163,33 @@ func TestCreateAccount_DuplicatedLoginIdFailure(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestCreateAccount_DuplicatedEmailFailure(t *testing.T) {
+func TestCreateAccount_NoEmailVerificationFailure(t *testing.T) {
 	router, container := testutil.PrepareForControllerTest(false)
 
 	account := accountController{
 		container,
 		&mockService{
 			createAccount: func(createAccountDto *dto.CreateAccountDto) (*model.Account, error) {
-				return nil, fmt.Errorf("duplicated Email")
+				return &model.Account{
+					Model: gorm.Model{
+						ID:        2,
+						CreatedAt: time.Now(),
+						UpdatedAt: time.Now(),
+					},
+					LoginId:   createAccountDto.LoginId,
+					Email:     createAccountDto.Email,
+					Password:  "hashed" + createAccountDto.Password,
+					Authority: model.AuthorityUser,
+				}, nil
 			},
 		},
 	}
-	router.POST(config.APIAccount, func(c echo.Context) error { return account.CreateAccount(c) })
+	router.POST(config.APIAccount, func(c echo.Context) error {
+		_ = container.GetSession().SetEmailVerification(c,
+			&infrastructure.EmailVerification{Email: "newTest@example.com", VerifiedAt: time.Time{}},
+		)
+		return account.CreateAccount(c)
+	})
 
 	dto := dto.CreateAccountDto{
 		LoginId:  "newTest",

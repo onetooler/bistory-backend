@@ -77,10 +77,16 @@ func (controller *accountController) CreateAccount(c echo.Context) error {
 	if err := c.Bind(data); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
+	_, err := controller.container.GetSession().IsVerifiedEmail(c, data.Email)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
 	account, err := controller.service.CreateAccount(data)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
+	_ = controller.container.GetSession().SetEmailVerification(c, nil)
+	_ = controller.container.GetSession().Delete(c)
 	return c.JSON(http.StatusOK, account)
 }
 

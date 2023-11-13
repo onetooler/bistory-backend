@@ -38,8 +38,9 @@ type Session interface {
 	GetValue(c echo.Context, key string) string
 	SetAccount(c echo.Context, account *Account) error
 	GetAccount(c echo.Context) *Account
-	SetEmailVerificationToken(c echo.Context, token string) error
+	SetEmailVerification(c echo.Context, emailVerification *EmailVerification) error
 	VerifyEmailToken(c echo.Context, token string) error
+	IsVerifiedEmail(c echo.Context, email string) (bool, error)
 	Login(c echo.Context, account *Account) error
 	Logout(c echo.Context) error
 	HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool
@@ -50,6 +51,13 @@ type Account struct {
 	LoginId   string    `json:"loginId"`
 	LoginTime time.Time `json:"loginTime"`
 	Authority uint      `json:"authority"`
+}
+
+type EmailVerification struct {
+	Email            string    `json:"email"`
+	Token            string    `json:"token"`
+	TokenGeneratedAt time.Time `json:"tokenGeneratedAt"`
+	VerifiedAt       time.Time `json:"verifiedAt"`
 }
 
 // NewSession is constructor.
@@ -167,19 +175,53 @@ func (s *session) GetAccount(c echo.Context) *Account {
 	return nil
 }
 
-func (s *session) SetEmailVerificationToken(c echo.Context, token string) error {
-	if err := s.SetValue(c, emailVerificationStr, token); err != nil {
+func (s *session) SetEmailVerification(c echo.Context, emailVerification *EmailVerification) error {
+	bytes, err := json.Marshal(emailVerification)
+	if err != nil {
+		return fmt.Errorf("json marshal error while set value in session")
+	}
+
+	if err := s.SetValue(c, emailVerificationStr, string(bytes)); err != nil {
 		return err
 	}
 	return s.Save(c)
 }
 
+func (s *session) GetEmailVerification(c echo.Context) *EmailVerification {
+	if v := s.GetValue(c, emailVerificationStr); v != "" {
+		e := &EmailVerification{}
+		_ = json.Unmarshal([]byte(v), e)
+		return e
+	}
+	return nil
+}
+
 func (s *session) VerifyEmailToken(c echo.Context, token string) error {
-	savedToken := s.GetValue(c, emailVerificationStr)
-	if savedToken != token {
+	emailVerification := s.GetEmailVerification(c)
+	if emailVerification == nil {
+		return fmt.Errorf("emailVerification not found")
+	}
+	if emailVerification.TokenGeneratedAt.Before(time.Now().Add(-config.EmailVerificationTokenLifetime)) {
+		_ = s.SetEmailVerification(c, nil)
+		return fmt.Errorf("token expired")
+	}
+	if token != emailVerification.Token {
 		return fmt.Errorf("token not matched")
 	}
-	return s.SetValue(c, emailVerificationStr, "VERIFIED")
+	emailVerification.VerifiedAt = time.Now()
+	return s.SetEmailVerification(c, emailVerification)
+}
+
+func (s *session) IsVerifiedEmail(c echo.Context, email string) (bool, error) {
+	emailVerification := s.GetEmailVerification(c)
+	if emailVerification.VerifiedAt.Before(time.Now().Add(-config.EmailVerificationLifetime)) {
+		_ = s.SetEmailVerification(c, nil)
+		return false, fmt.Errorf("verification expired")
+	}
+	if email != emailVerification.Email {
+		return false, fmt.Errorf("email not matched")
+	}
+	return true, nil
 }
 
 func (s *session) HasAuthorizationTo(c echo.Context, accountId uint, authority uint) bool {

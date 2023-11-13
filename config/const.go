@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 // ErrExitStatus represents the error status in this application.
 const ErrExitStatus int = 2
 
@@ -15,9 +17,11 @@ const (
 
 // Constant about account&auth domain
 const (
-	PasswordHashCost             int = 10
-	MaxLoginAttempts             int = 5
-	EmailVerificationTokenLength int = 6
+	PasswordHashCost               int           = 10
+	MaxLoginAttempts               int           = 5
+	EmailVerificationTokenLength   int           = 6
+	EmailVerificationTokenLifetime time.Duration = 3 * time.Minute
+	EmailVerificationLifetime      time.Duration = 3 * time.Minute
 )
 
 const (

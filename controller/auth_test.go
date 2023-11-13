@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/onetooler/bistory-backend/config"
+	"github.com/onetooler/bistory-backend/infrastructure"
 	"github.com/onetooler/bistory-backend/model/dto"
 	"github.com/onetooler/bistory-backend/testutil"
 	"github.com/onetooler/bistory-backend/util"
@@ -124,7 +126,12 @@ func TestEmailVerificationTokenVerify_Success(t *testing.T) {
 
 	token := "123456"
 	router.POST(config.APIAuthEmailVerificationTokenSend, func(c echo.Context) error {
-		_ = container.GetSession().SetEmailVerificationToken(c, token)
+		emailVerification := &infrastructure.EmailVerification{
+			Email:            "newTest@example.com",
+			Token:            token,
+			TokenGeneratedAt: time.Now(),
+		}
+		_ = container.GetSession().SetEmailVerification(c, emailVerification)
 		return c.NoContent(http.StatusOK)
 	})
 	preRec := httptest.NewRecorder()

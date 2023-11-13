@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/onetooler/bistory-backend/container"
@@ -140,7 +141,12 @@ func (controller *authController) EmailVerificationTokenSend(c echo.Context) err
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	err = sess.SetEmailVerificationToken(c, *token)
+	emailVerification := &infrastructure.EmailVerification{
+		Email:            dto.Email,
+		Token:            *token,
+		TokenGeneratedAt: time.Now(),
+	}
+	err = sess.SetEmailVerification(c, emailVerification)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}

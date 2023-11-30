@@ -27,7 +27,7 @@ func NewErrorController(container container.Container) ErrorController {
 	return &errorController{container: container}
 }
 
-// JSONError is cumstomize error handler
+// JSONError is custom error handler
 func (controller *errorController) JSONError(err error, c echo.Context) {
 	logger := controller.container.GetLogger()
 	code := http.StatusInternalServerError
